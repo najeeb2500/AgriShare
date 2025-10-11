@@ -1,14 +1,46 @@
 import User from "../models/User.js";
-// import bcrypt from "bcryptjs";
+import bcrypt from "bcryptjs";
 
 // Create a new user
-export const createUser = async (req, res) => { 
-  try { const { name, role, email, password } = req.body; // Check if user already exists
- const existingUser = await User.findOne({ email }); 
- if (existingUser) { return res.status(400).json({ message: "User already exists" }); } 
- const user = new User({ name, role, email, password  }); 
- const savedUser = await user.save(); res.status(201).json({ message: "User created successfully", user: { id: savedUser._id, name: savedUser.name, role: savedUser.role, email: savedUser.email } }); } catch (error) { res.status(500).json({ message: "Error creating user", error: error.message }); } };
+export const createUser = async (req, res) => {
+  try {
+    const { name, role, email, password } = req.body;
 
+    // 1️⃣ Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "User already exists" });
+    }
+
+    // 2️⃣ Hash the password before saving
+    const salt = await bcrypt.genSalt(10); // generates salt with strength 10
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // 3️⃣ Create new user with hashed password
+    const user = new User({
+      name,
+      role,
+      email,
+      password: hashedPassword
+    });
+
+    // 4️⃣ Save user to DB
+    const savedUser = await user.save();
+
+    // 5️⃣ Send response without password
+    res.status(201).json({
+      message: "User created successfully",
+      user: {
+        id: savedUser._id,
+        name: savedUser.name,
+        role: savedUser.role,
+        email: savedUser.email
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error creating user", error: error.message });
+  }
+};
 
 // Get all users
 export const getUsers = async (req, res) => {

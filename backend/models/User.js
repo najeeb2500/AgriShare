@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
   name: String,
-  role: { type: String, enum: ["admin", "gardener", "volunteer","landowner"] },
+  role: { type: String, enum: ["admin", "gardener", "volunteer","landowner","expert"] },
   email: String,
   password: String
 });

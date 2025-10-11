@@ -11,9 +11,12 @@ export default function Signup() {
   const [success, setSuccess] = useState("");
 
   const roles = [
-    { value: "farmer", label: "Farmer" },
+    { value: "gardener", label: "gardener" },
     { value: "volunteer", label: "Volunteer" },
-    { value: "admin", label: "Admin" }
+    { value: "admin", label: "Admin" },
+    { value: "landowner", label: "landowner"},
+    { value: "expert", label: "expert"},
+    
   ];
 
   const handleChange = (e) => {
