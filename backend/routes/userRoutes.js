@@ -6,29 +6,38 @@ import {
   updateUser,
   deleteUser,
   getUsersByRole,
-  loginUser
+  loginUser,
+  getPendingUsers,
+  approveUser,
+  rejectUser,
+  getUserProfile,
+  updateUserProfile
 } from "../controllers/userController.js";
+import { authenticateToken, requireAdmin, requireApproval } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// Create a new user
+// Public routes
 router.post("/users", createUser);
+router.post("/userlogin", loginUser);
 
-// Get all users
-router.get("/users", getUsers);
+// Protected routes
+router.use(authenticateToken);
 
-// Get user by ID
-router.get("/users/:id", getUserById);
+// User profile routes
+router.get("/profile/:userId", getUserProfile);
+router.put("/profile/:userId", updateUserProfile);
 
-// Update user
-router.put("/users/:id", updateUser);
+// Admin only routes
+router.get("/pending-users", requireAdmin, getPendingUsers);
+router.put("/approve-user/:userId", requireAdmin, approveUser);
+router.delete("/reject-user/:userId", requireAdmin, rejectUser);
 
-// Delete user
-router.delete("/users/:id", deleteUser);
-
-// Get users by role
-router.get("/users/role/:role", getUsersByRole);
-
-router.post("/userlogin",loginUser)
+// General user routes (require approval)
+router.get("/users", requireApproval, getUsers);
+router.get("/users/:id", requireApproval, getUserById);
+router.put("/users/:id", requireApproval, updateUser);
+router.delete("/users/:id", requireAdmin, deleteUser);
+router.get("/users/role/:role", requireApproval, getUsersByRole);
 
 export default router;
