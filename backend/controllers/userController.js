@@ -1,74 +1,56 @@
-import User from "../models/User.js";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import User from "../models/User.js";
 
 // Create a new user
 export const createUser = async (req, res) => {
   try {
-    const { 
-      name, 
-      role, 
-      email, 
-      password, 
-      phone, 
-      address, 
-      bio, 
-      experience, 
-      skills,
-      landowner,
-      gardener,
-      volunteer,
-      expert
-    } = req.body;
+    const { name, role, email, password } = req.body;
 
-    // 1️⃣ Check if user already exists
+    // 1️⃣ Validate required fields
+    if (!name || !email || !password || !role) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    // 2️⃣ Check if user already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    // 2️⃣ Hash the password before saving
+    // 3️⃣ Hash the password before saving
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // 3️⃣ Create new user with hashed password
+    // 4️⃣ Create a new user
     const user = new User({
       name,
       role,
       email,
       password: hashedPassword,
-      phone,
-      address,
-      bio,
-      experience,
-      skills,
-      // Role-specific data
-      ...(role === 'landowner' && landowner && { landowner }),
-      ...(role === 'gardener' && gardener && { gardener }),
-      ...(role === 'volunteer' && volunteer && { volunteer }),
-      ...(role === 'expert' && expert && { expert }),
-      // Admin users are auto-approved
-      isApproved: role === 'admin'
+     // optional if you have admin auto-approval
     });
 
-    // 4️⃣ Save user to DB
+    // 5️⃣ Save user to DB
     const savedUser = await user.save();
 
-    // 5️⃣ Send response without password
+    // 6️⃣ Send response (without password)
     res.status(201).json({
-      message: role === 'admin' 
-        ? "Admin user created successfully" 
-        : "User registration submitted for approval",
+      message:
+        role === "admin"
+          ? "Admin user created successfully"
+          : "User registration submitted for approval",
       user: {
         id: savedUser._id,
         name: savedUser.name,
         role: savedUser.role,
         email: savedUser.email,
-        isApproved: savedUser.isApproved
-      }
+      },
     });
   } catch (error) {
-    res.status(500).json({ message: "Error creating user", error: error.message });
+    console.error("Error creating user:", error);
+    res
+      .status(500)
+      .json({ message: "Error creating user", error: error.message });
   }
 };
 
@@ -153,9 +135,11 @@ export const loginUser = async (req, res) => {
 
     // 1️⃣ Check if the user exists
     const user = await User.findOne({ email });
+    console.log(user+"u")
     if (!user) {
       return res.status(400).json({ message: "Invalid email or password" });
     }
+
 
     // 2️⃣ Compare password
     const isMatch = await bcrypt.compare(password, user.password);
@@ -163,48 +147,32 @@ export const loginUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    // 3️⃣ Check if user is approved (except for admin)
-    if (!user.isApproved && user.role !== 'admin') {
-      return res.status(403).json({ 
-        message: "Your account is pending approval. Please wait for admin approval." 
-      });
-    }
+    
 
-    // 4️⃣ Check if user is active
-    if (!user.isActive) {
-      return res.status(403).json({ 
-        message: "Your account has been deactivated. Please contact admin." 
-      });
-    }
 
-    // 5️⃣ Update last login
-    user.lastLogin = new Date();
-    await user.save();
+    // // 5️⃣ Update last login
+    // user.lastLogin = new Date();
+    // await user.save();
 
-    // 6️⃣ Generate JWT token
-    const token = jwt.sign(
-      { 
-        userId: user._id, 
-        email: user.email, 
-        role: user.role 
-      },
-      process.env.JWT_SECRET || 'your-secret-key',
-      { expiresIn: '7d' }
-    );
+    // // 6️⃣ Generate JWT token
+    // const token = jwt.sign(
+    //   { 
+    //     userId: user._id, 
+    //     email: user.email, 
+    //     role: user.role 
+    //   },
+    //   process.env.JWT_SECRET || 'your-secret-key',
+    //   { expiresIn: '7d' }
+    // );
 
     // 7️⃣ Send response
     res.status(200).json({
       message: "Login successful",
-      token,
       user: {
         id: user._id,
         name: user.name,
         role: user.role,
         email: user.email,
-        isApproved: user.isApproved,
-        phone: user.phone,
-        address: user.address,
-        bio: user.bio
       }
     });
   } catch (error) {
@@ -216,7 +184,7 @@ export const loginUser = async (req, res) => {
 export const getPendingUsers = async (req, res) => {
   try {
     const pendingUsers = await User.find({ 
-      isApproved: false, 
+      // isApproved: false, 
       role: { $ne: 'admin' } 
     }).select("-password");
     

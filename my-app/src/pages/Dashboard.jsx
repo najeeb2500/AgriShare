@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 
 // Import role-specific dashboard components
 import AdminDashboard from '../components/dashboard/AdminDashboard';
+import ExpertDashboard from '../components/dashboard/ExpertDashboard';
 import GardenerDashboard from '../components/dashboard/GardenerDashboard';
 import LandownerDashboard from '../components/dashboard/LandownerDashboard';
 import VolunteerDashboard from '../components/dashboard/VolunteerDashboard';
-import ExpertDashboard from '../components/dashboard/ExpertDashboard';
 import Navigation from '../components/Navigation';
 
 export default function Dashboard() {
@@ -31,6 +31,7 @@ export default function Dashboard() {
       
       // Check if user role matches the dashboard route
       if (parsedUser.role !== role) {
+        console.log("role",parsedUser.role)
         navigate(`/dashboard/${parsedUser.role}`);
         return;
       }

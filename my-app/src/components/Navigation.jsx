@@ -1,5 +1,4 @@
-import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 export default function Navigation({ user, onLogout }) {
   const navigate = useNavigate();
@@ -24,13 +23,13 @@ export default function Navigation({ user, onLogout }) {
         return [
           ...baseItems,
           { name: 'User Management', path: `/dashboard/${user.role}`, icon: '👥' },
-          { name: 'Land Allocation', path: `/dashboard/${user.role}`, icon: '🌱' }
+          { name: 'Land Allocation', path: `/lands`, icon: '🌱' }
         ];
       case 'landowner':
         return [
           ...baseItems,
           { name: 'My Lands', path: `/dashboard/${user.role}`, icon: '🏞️' },
-          { name: 'Add Land', path: `/dashboard/${user.role}`, icon: '➕' }
+          // { name: 'Add Land', path: `/dashboard/${user.role}`, icon: '➕' }
         ];
       case 'gardener':
         return [

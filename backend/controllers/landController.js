@@ -5,17 +5,24 @@ import User from "../models/User.js";
 export const createLand = async (req, res) => {
   try {
     const landData = req.body;
-    landData.createdBy = req.user.userId; // Assuming middleware sets req.user
 
-    const land = new Land(landData);
-    const savedLand = await land.save();
+    // Ensure createdBy is string (userId passed from frontend)
+    if (!landData.createdBy) {
+      return res.status(400).json({ message: "User ID (createdBy) is required" });
+    }
+
+    const newLand = new Land(landData);
+    const savedLand = await newLand.save();
 
     res.status(201).json({
-      message: "Land listing created successfully",
-      land: savedLand
+      message: "Land created successfully",
+      land: savedLand,
     });
   } catch (error) {
-    res.status(500).json({ message: "Error creating land listing", error: error.message });
+    res.status(500).json({
+      message: "Error creating land",
+      error: error.message,
+    });
   }
 };
 
@@ -25,7 +32,7 @@ export const getAvailableLands = async (req, res) => {
     const { page = 1, limit = 10, city, state, minArea, maxArea, soilType } = req.query;
     
     let query = { 
-      status: 'available', 
+      // status: 'available', 
       isActive: true 
     };
 
@@ -162,7 +169,7 @@ export const updateLand = async (req, res) => {
   try {
     const { landId } = req.params;
     const updateData = req.body;
-
+     console.log("up",updateData)
     // Remove fields that shouldn't be updated directly
     delete updateData.landowner;
     delete updateData.createdBy;

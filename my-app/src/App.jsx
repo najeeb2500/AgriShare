@@ -1,11 +1,12 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Landing from './pages/Landing';
-import Signup from './pages/Signup';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import Marketplace from './pages/Marketplace';
-import ListingDetail from './pages/ListingDetail';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Community from './pages/Community';
+import Dashboard from './pages/Dashboard';
+import Landing from './pages/Landing';
+import LandManagement from "./pages/LandManagement";
+import ListingDetail from './pages/ListingDetail';
+import Login from './pages/Login';
+import Marketplace from './pages/Marketplace';
+import Signup from './pages/Signup';
 // import NotFound from './pages/NotFound'; // Adjust path as needed
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
         <Route path="/marketplace" element={<Marketplace />} />
         <Route path="/marketplace/:id" element={<ListingDetail />} />
         <Route path="/community" element={<Community />} />
+       <Route path="/lands" element={<LandManagement />} />
         {/* <Route path="*" element={<NotFound />} /> */}
       </Routes>
     </BrowserRouter>

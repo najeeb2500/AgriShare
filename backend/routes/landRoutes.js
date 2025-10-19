@@ -1,33 +1,33 @@
 import express from "express";
 import {
+  allocateLand,
   createLand,
+  deleteLand,
   getAvailableLands,
   getLandById,
   getLandsByLandowner,
-  allocateLand,
-  updateLandStatus,
+  getLandsNearLocation,
   updateLand,
-  deleteLand,
-  getLandsNearLocation
+  updateLandStatus
 } from "../controllers/landController.js";
-import { authenticateToken, requireApproval, requireAdmin, requireRole } from "../middleware/auth.js";
+import { requireAdmin } from "../middleware/auth.js";
 
 const router = express.Router();
 
 // All routes require authentication
-router.use(authenticateToken);
+// router.use(authenticateToken);
 
 // Public land routes (require approval)
-router.get("/available", requireApproval, getAvailableLands);
-router.get("/nearby", requireApproval, getLandsNearLocation);
-router.get("/:id", requireApproval, getLandById);
+router.get("/available", getAvailableLands);
+router.get("/nearby", getLandsNearLocation);
+router.get("/:id", getLandById);
 
 // Landowner routes
-router.post("/", requireRole('landowner', 'admin'), requireApproval, createLand);
-router.get("/landowner/:landownerId", requireApproval, getLandsByLandowner);
-router.put("/:landId", requireApproval, updateLand);
-router.put("/:landId/status", requireApproval, updateLandStatus);
-router.delete("/:landId", requireApproval, deleteLand);
+router.post("/", createLand);
+router.get("/landowner/:landownerId",  getLandsByLandowner);
+router.put("/:landId", updateLand);
+router.put("/:landId/status", updateLandStatus);
+router.delete("/:landId", deleteLand);
 
 // Admin only routes
 router.put("/:landId/allocate", requireAdmin, allocateLand);

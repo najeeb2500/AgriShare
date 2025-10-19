@@ -1,14 +1,14 @@
-import express from "express";
-import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
-import userRoutes from "./routes/userRoutes.js";
-import landRoutes from "./routes/landRoutes.js";
-import taskRoutes from "./routes/taskRoutes.js";
-import progressRoutes from "./routes/progressRoutes.js";
-import communityRoutes from "./routes/communityRoutes.js";
-import marketplaceRoutes from "./routes/marketplaceRoutes.js";
+import express from "express";
+import mongoose from "mongoose";
 import { errorHandler, notFound, requestLogger, securityHeaders } from "./middleware/errorHandler.js";
+import communityRoutes from "./routes/communityRoutes.js";
+import landRoutes from "./routes/landRoutes.js";
+import marketplaceRoutes from "./routes/marketplaceRoutes.js";
+import progressRoutes from "./routes/progressRoutes.js";
+import taskRoutes from "./routes/taskRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 
 dotenv.config();
 const app = express();

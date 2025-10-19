@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function AdminDashboard({ user, onLogout }) {
   const [pendingUsers, setPendingUsers] = useState([]);
@@ -19,10 +19,8 @@ export default function AdminDashboard({ user, onLogout }) {
       const token = localStorage.getItem('token');
       
       // Fetch pending users
-      const pendingRes = await fetch('http://localhost:5000/api/users/pending-users', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+      const pendingRes = await fetch('http://localhost:5000/api/users/getusers', {
+        
       });
       const pendingData = await pendingRes.json();
       setPendingUsers(pendingData);
