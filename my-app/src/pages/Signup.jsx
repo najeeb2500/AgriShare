@@ -1,5 +1,5 @@
 import { useState } from "react";
-
+import { useNavigate } from "react-router-dom";
 export default function Signup() {
   const [form, setForm] = useState({
     name: "",
@@ -10,7 +10,7 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-
+  const navigate = useNavigate()
   const roles = [
     { value: "gardener", label: "Gardener" },
     { value: "volunteer", label: "Volunteer" },
@@ -52,13 +52,20 @@ export default function Signup() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to create user");
 
-      setSuccess(data.message || "User created successfully");
+      setSuccess("User created successfully");
+        // Store token and user data
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
       setForm({
         name: "",
         role: "gardener",
         email: "",
         password: "",
       });
+
+        setTimeout(() => {
+        navigate(`/dashboard/${data.user.role}`);
+      }, 1000);
     } catch (err) {
       setError(err.message);
     } finally {

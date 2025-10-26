@@ -1,6 +1,6 @@
 import Land from "../models/Land.js";
 import User from "../models/User.js";
-
+import nodemailer from "nodemailer";
 // Create a new land listing
 export const createLand = async (req, res) => {
   try {
@@ -155,6 +155,33 @@ export const updateLandStatus = async (req, res) => {
       return res.status(404).json({ message: "Land not found" });
     }
 
+    const transporter = nodemailer.createTransport({
+      service: "gmail", // you can use others like Outlook, Yahoo, etc.
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    // Email options
+    const mailOptions = {
+      from: `"AgriShare" <${process.env.EMAIL_USER}>`,
+      to,
+      subject,
+      html: `
+        <div style="font-family: Arial; line-height:1.5;">
+          <h2 style="color:#2e7d32;">${subject}</h2>
+          <p>${message}</p>
+          <p style="font-size:0.9em; color:#555;">
+            — AgriShare Team 🌱
+          </p>
+        </div>
+      `,
+    };
+
+    // Send email
+    await transporter.sendMail(mailOptions);
+
     res.status(200).json({
       message: "Land status updated successfully",
       land
@@ -169,7 +196,6 @@ export const updateLand = async (req, res) => {
   try {
     const { landId } = req.params;
     const updateData = req.body;
-     console.log("up",updateData)
     // Remove fields that shouldn't be updated directly
     delete updateData.landowner;
     delete updateData.createdBy;
@@ -199,7 +225,7 @@ export const deleteLand = async (req, res) => {
   try {
     const land = await Land.findByIdAndUpdate(
       req.params.landId,
-      { isActive: false },
+      { isActive: false , status:"cancelled"},
       { new: true }
     );
 

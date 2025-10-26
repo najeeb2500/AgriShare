@@ -60,7 +60,7 @@ const landSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["available", "allocated", "cultivated", "maintenance", "unavailable"],
+      enum: ["available", "allocated", "cultivated", "maintenance", "cancelled"],
       default: "available",
     },
     allocatedTo: {

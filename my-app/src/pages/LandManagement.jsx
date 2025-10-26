@@ -1,11 +1,10 @@
 import axios from "axios";
 import {
-    Edit,
-    Loader2,
-    Plus,
-    Search,
-    Trash2,
-    X,
+  Edit,
+  Loader2,
+  Search,
+  Trash2,
+  X
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -131,12 +130,12 @@ export default function LandManagement() {
           <h1 className="text-2xl font-bold text-green-700">🌾 Land Management</h1>
           <p className="text-gray-600 text-sm">Manage, edit, and allocate lands.</p>
         </div>
-        <button
+        {/* <button
           onClick={() => openForm()}
           className="mt-3 md:mt-0 flex items-center gap-2 px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
         >
           <Plus className="w-4 h-4" /> Add New Land
-        </button>
+        </button> */}
       </div>
 
       {/* Search + Filter */}
