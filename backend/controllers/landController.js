@@ -88,7 +88,7 @@ export const getLandById = async (req, res) => {
 export const getLandsByLandowner = async (req, res) => {
   try {
     const { landownerId } = req.params;
-    const lands = await Land.find({ landowner: landownerId })
+    const lands = await Land.find({  })
       .populate('allocatedTo.gardener', 'name email phone')
       .sort({ createdAt: -1 });
 

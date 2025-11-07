@@ -19,6 +19,8 @@ export default function LandownerDashboard({ user, onLogout }) {
 const [filterSoil, setFilterSoil] = useState("");
 const [filterStatus, setFilterStatus] = useState("");
 const [sortOption, setSortOption] = useState("");
+const [sortUser,setSortUser] = useState("")
+
 
   useEffect(() => {
     fetchDashboardData();
@@ -28,6 +30,7 @@ const [sortOption, setSortOption] = useState("");
     try {
       const res = await fetch(`http://localhost:5000/api/lands/landowner/${user.id}`);
       const data = await res.json();
+      console.log("user",user)
       setMyLands(data || []);
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
@@ -45,6 +48,9 @@ const [sortOption, setSortOption] = useState("");
   )
   .filter((land) =>
     filterStatus ? land.status === filterStatus : true
+  )
+  .filter((land) =>
+    sortUser === "my" ? land.landowner === user.id : true
   )
   .sort((a, b) => {
     if (sortOption === "title-asc") return a.title.localeCompare(b.title);
@@ -413,9 +419,18 @@ const [sortOption, setSortOption] = useState("");
         <option value="area-asc">Area (Low → High)</option>
         <option value="area-desc">Area (High → Low)</option>
       </select>
+
+      <select
+  value={sortUser}
+  onChange={(e) => setSortUser(e.target.value)}
+  className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+>
+  <option value="all">All Lands</option>
+  <option value="my">My Lands</option>
+</select>
+
     </div>
   </div>
-
   {/* 🪴 Land Cards */}
   {filteredLands.length === 0 ? (
     <div className="text-center py-8 text-gray-600">
