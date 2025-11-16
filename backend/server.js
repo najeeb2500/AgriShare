@@ -9,6 +9,7 @@ import marketplaceRoutes from "./routes/marketplaceRoutes.js";
 import progressRoutes from "./routes/progressRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import landRequestRoutes from './routes/landRequestRoutes.js'
 
 dotenv.config();
 const app = express();
@@ -32,6 +33,7 @@ app.use("/api/tasks", taskRoutes);
 app.use("/api/progress", progressRoutes);
 app.use("/api/community", communityRoutes);
 app.use("/api/marketplace", marketplaceRoutes);
+app.use("/api/land-requests", landRequestRoutes);
 
 // Basic route
 app.get("/", (req, res) => {

@@ -20,6 +20,14 @@ const [filterSoil, setFilterSoil] = useState("");
 const [filterStatus, setFilterStatus] = useState("");
 const [sortOption, setSortOption] = useState("");
 const [sortUser,setSortUser] = useState("")
+const [showRequestForm, setShowRequestForm] = useState(false);
+const [selectedLand, setSelectedLand] = useState(null);
+const [requestData, setRequestData] = useState({
+  crop: "",
+  duration: "",
+  message: "",
+});
+
 
 
   useEffect(() => {
@@ -121,6 +129,41 @@ const [sortUser,setSortUser] = useState("")
       console.error("Error adding land:", error);
     }
   };
+
+ const handleSubmitRequest = async (e) => {
+  e.preventDefault();
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await fetch("http://localhost:5000/api/land-requests/request", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        landId: selectedLand._id,
+        userId: user.id,
+        crop: requestData.crop,
+        cultivationDuration: Number(requestData.duration),
+        message: requestData.message,
+      }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      alert("Request submitted successfully!");
+      setShowRequestForm(false);
+      setRequestData({ crop: "", duration: "", message: "" });
+    } else {
+      alert(data.message || "Failed to submit request");
+    }
+  } catch (error) {
+    console.error("Request Error:", error);
+  }
+};
+
 
   if (loading) {
     return (
@@ -313,6 +356,23 @@ const [sortUser,setSortUser] = useState("")
         </div>
       )}
 
+
+
+
+{showRequestForm && (
+<div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+<div className="bg-white p-6 rounded-lg w-full max-w-lg">
+<h2 className="text-xl font-bold mb-4">Request Cultivation</h2>
+<form onSubmit={handleSubmitRequest} className="space-y-4">
+<input className="w-full border p-2" placeholder="Crop Name" required onChange={(e)=>setRequestData({...requestData,crop:e.target.value})}/>
+<input className="w-full border p-2" placeholder="Duration (months)" required onChange={(e)=>setRequestData({...requestData,duration:e.target.value})}/>
+<textarea className="w-full border p-2" placeholder="Message" onChange={(e)=>setRequestData({...requestData,message:e.target.value})}/>
+<button className="bg-blue-600 text-white px-4 py-2 rounded">Submit Request</button>
+</form>
+</div>
+</div>
+)}
+
       {/* Dashboard Stats & Lands */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats Cards */}
@@ -403,7 +463,11 @@ const [sortUser,setSortUser] = useState("")
         <option value="">All Status</option>
         <option value="available">Available</option>
         <option value="allocated">Allocated</option>
-        <option value="unavailable">Unavailable</option>
+        <option value="cultivated">Cultivated</option>
+<option value="maintenance">Maintenance</option>
+<option value="cancelled">Cancelled</option>
+
+        {/* <option value="unavailable">Unavailable</option> */}
       </select>
     </div>
 
@@ -423,7 +487,7 @@ const [sortUser,setSortUser] = useState("")
       <select
   value={sortUser}
   onChange={(e) => setSortUser(e.target.value)}
-  className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500"
+  className="border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500" 
 >
   <option value="all">All Lands</option>
   <option value="my">My Lands</option>
@@ -439,10 +503,7 @@ const [sortUser,setSortUser] = useState("")
   ) : (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {filteredLands.map((land) => (
-        <div
-          key={land._id}
-          className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-        >
+        <div key={land._id} className="border rounded-lg p-4">
           <div className="flex justify-between items-center mb-2">
             <h3 className="font-semibold text-gray-900">{land.title}</h3>
             <span
@@ -460,6 +521,25 @@ const [sortUser,setSortUser] = useState("")
             </span>
           </div>
           <p className="text-sm text-gray-600 mb-3">{land.description}</p>
+
+          { land.status === "available" && (
+  <button
+    onClick={() => {
+      setSelectedLand(land);
+      setShowRequestForm(true);
+    }}
+    className="mt-3 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+  >
+    Request Cultivation
+  </button>
+)}
+
+{land.status === "allocated"  && (
+  <p className="mt-3 text-sm text-green-700 font-semibold">
+    ✔ You have been allocated this land.
+  </p>
+)}
+
 
           <div className="text-xs text-gray-500 space-y-1">
             <p>

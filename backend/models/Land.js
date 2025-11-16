@@ -65,6 +65,7 @@ const landSchema = new mongoose.Schema(
     },
     allocatedTo: {
       gardener: String, // changed to String
+      user: String,
       allocatedAt: Date,
       allocatedBy: String, // changed to String
     },

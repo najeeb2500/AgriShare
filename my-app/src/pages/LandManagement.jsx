@@ -23,6 +23,9 @@ export default function LandManagement() {
     location: { address: { city: "", state: "" } },
     soilType: "unknown",
   });
+  const [showRequests, setShowRequests] = useState(false);
+const [requests, setRequests] = useState([]);
+
 
   const BASE_URL = "http://localhost:5000/api/lands"; // update as needed
 
@@ -39,8 +42,21 @@ export default function LandManagement() {
     }
   };
 
+  const fetchRequests = async () => {
+  try {
+    const res = await axios.get("http://localhost:5000/api/land-requests/all");
+    setRequests(res.data || []);
+    setShowRequests(true);
+  } catch (err) {
+    console.error(err);
+    alert("Failed to load requests");
+  }
+};
+
+
   useEffect(() => {
     fetchLands();
+    fetchRequests()
   }, []);
 
   // 🔹 Handle input
@@ -110,6 +126,33 @@ export default function LandManagement() {
     }
   };
 
+
+  const approveRequest = async (id) => {
+  try {
+    await axios.put(`http://localhost:5000/api/land-requests/approve/${id}`, {
+      adminId: "admin123",
+    });
+    alert("Request approved");
+    fetchRequests();
+    fetchLands();
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+const rejectRequest = async (id) => {
+  try {
+    await axios.put(`http://localhost:5000/api/land-requests/reject/${id}`, {
+      adminId: "admin123",
+    });
+    alert("Request rejected");
+    fetchRequests();
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+
   // 🔹 Filter & Sort
   const filteredLands = lands
     .filter((l) => l.title.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -149,6 +192,12 @@ export default function LandManagement() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
+          <button
+  onClick={() => fetchRequests()}
+  className="mt-3 md:mt-0 flex items-center gap-2 px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+>
+  View Requests
+</button>
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
@@ -302,6 +351,55 @@ export default function LandManagement() {
           </div>
         </div>
       )}
+
+      {showRequests && (
+  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div className="bg-white w-full max-w-3xl p-6 rounded-xl relative">
+      <button
+        onClick={() => setShowRequests(false)}
+        className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
+      >
+        <X className="w-5 h-5" />
+      </button>
+
+      <h2 className="text-xl font-bold mb-4 text-blue-700">Cultivation Requests</h2>
+
+      {requests.length === 0 ? (
+        <p className="text-gray-600">No requests found.</p>
+      ) : (
+        <div className="space-y-4 max-h-[400px] overflow-y-auto">
+          {requests.map((req) => (
+            <div key={req._id} className="border p-4 rounded-lg shadow-sm bg-gray-50">
+              <h3 className="font-semibold">{req.crop}</h3>
+              <p className="text-sm text-gray-600">
+                User: {req.userId} <br />
+                Land: {req.landId} <br />
+                Duration: {req.cultivationDuration} months
+              </p>
+              <p className="mt-2 text-xs text-gray-500 italic">{req.message}</p>
+
+              <div className="flex gap-3 mt-3 justify-end">
+                <button
+                  onClick={() => approveRequest(req._id)}
+                  className="px-3 py-1 rounded bg-green-600 text-white"
+                >
+                  Approve
+                </button>
+                <button
+                  onClick={() => rejectRequest(req._id)}
+                  className="px-3 py-1 rounded bg-red-600 text-white"
+                >
+                  Reject
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  </div>
+)}
+
     </div>
   );
 }
