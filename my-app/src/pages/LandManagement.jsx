@@ -47,6 +47,7 @@ const [requests, setRequests] = useState([]);
     const res = await axios.get("http://localhost:5000/api/land-requests/all");
     setRequests(res.data || []);
     setShowRequests(true);
+      console.log("data",res.data)
   } catch (err) {
     console.error(err);
     alert("Failed to load requests");
@@ -364,30 +365,62 @@ const rejectRequest = async (id) => {
 
       <h2 className="text-xl font-bold mb-4 text-blue-700">Cultivation Requests</h2>
 
+    {showRequests && (
+  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div className="bg-white w-full max-w-3xl p-6 rounded-xl relative">
+      
+      <button
+        onClick={() => setShowRequests(false)}
+        className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
+      >
+        <X className="w-5 h-5" />
+      </button>
+
+      <h2 className="text-xl font-bold mb-4 text-blue-700">Cultivation Requests</h2>
+
       {requests.length === 0 ? (
         <p className="text-gray-600">No requests found.</p>
       ) : (
         <div className="space-y-4 max-h-[400px] overflow-y-auto">
           {requests.map((req) => (
-            <div key={req._id} className="border p-4 rounded-lg shadow-sm bg-gray-50">
-              <h3 className="font-semibold">{req.crop}</h3>
-              <p className="text-sm text-gray-600">
-                User: {req.userId} <br />
-                Land: {req.landId} <br />
-                Duration: {req.cultivationDuration} months
-              </p>
-              <p className="mt-2 text-xs text-gray-500 italic">{req.message}</p>
+            <div
+              key={req._id}
+              className="border p-4 rounded-lg shadow-sm bg-gray-50"
+            >
+              <h3 className="font-semibold">🌱 {req.crop}</h3>
 
-              <div className="flex gap-3 mt-3 justify-end">
+              <p className="text-sm text-gray-700 mt-1">
+                <span className="font-medium">👤 User:</span>{" "}
+                {req?.userId?.name || "Unknown User"}
+              </p>
+
+              <p className="text-sm text-gray-700">
+                <span className="font-medium">🌾 Land:</span>{" "}
+                {req?.landId?.title || "Unnamed Land"} (
+                {req?.landId?.location?.address?.city || "Unknown City"},
+                {req?.landId?.location?.address?.state || "Unknown State"})
+              </p>
+
+              <p className="text-sm text-gray-700">
+                <span className="font-medium">⏳ Duration:</span>{" "}
+                {req.cultivationDuration} months
+              </p>
+
+              <p className="mt-2 text-xs text-gray-500 italic">
+                {req.message}
+              </p>
+
+              <div className="flex gap-3 mt-4 justify-end">
                 <button
                   onClick={() => approveRequest(req._id)}
-                  className="px-3 py-1 rounded bg-green-600 text-white"
+                  className="px-4 py-1 rounded bg-green-600 text-white"
                 >
                   Approve
                 </button>
+
                 <button
                   onClick={() => rejectRequest(req._id)}
-                  className="px-3 py-1 rounded bg-red-600 text-white"
+                  className="px-4 py-1 rounded bg-red-600 text-white"
                 >
                   Reject
                 </button>
@@ -396,6 +429,10 @@ const rejectRequest = async (id) => {
           ))}
         </div>
       )}
+    </div>
+  </div>
+)}
+
     </div>
   </div>
 )}

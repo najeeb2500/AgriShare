@@ -4,10 +4,12 @@ const landRequestSchema = new mongoose.Schema(
   {
     landId: {
       type: String, // land id as string
+      ref:"User",
       required: true,
     },
     userId: {
       type: String, // who requested
+      ref:"Land",
       required: true,
     },
     crop: {

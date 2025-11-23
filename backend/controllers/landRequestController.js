@@ -9,11 +9,28 @@ export const createRequest = async (req, res) => {
   try {
     const { landId, userId, crop, cultivationDuration, message } = req.body;
 
+    // Check if land exists
     const landExists = await Land.findById(landId);
     if (!landExists) {
       return res.status(404).json({ message: "Land not found" });
     }
 
+    // Check for duplicate request
+    const existingRequest = await LandRequest.findOne({
+      landId,
+      userId,
+      crop,
+      cultivationDuration,
+      message
+    });
+
+    if (existingRequest) {
+      return res.status(400).json({
+        message: "Request already submitted for this land by the same user!"
+      });
+    }
+
+    // Create new request
     const newRequest = new LandRequest({
       landId,
       userId,
@@ -28,10 +45,12 @@ export const createRequest = async (req, res) => {
       message: "Land cultivation request submitted",
       request: newRequest,
     });
+
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 
 // -----------------------------
@@ -39,7 +58,9 @@ export const createRequest = async (req, res) => {
 // -----------------------------
 export const getAllRequests = async (req, res) => {
   try {
-    const requests = await LandRequest.find().sort({ createdAt: -1 });
+    const requests = await LandRequest.find({status:"pending"}).sort({ createdAt: -1 })
+      .populate("userId", "name email role")     // populate user details
+      .populate("landId", "title location");;
 
     res.status(200).json(requests);
   } catch (error) {
