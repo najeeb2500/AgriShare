@@ -1,0 +1,113 @@
+{
+  "_type": "collection",
+  "name": "AgriShare - Task Controller",
+  "data": {
+    "_postman_id": "agri_tasks_collection",
+    "variables": [
+      { "key": "base_url", "value": "http://localhost:5000/api" },
+      { "key": "token", "value": "" }
+    ],
+    "items": [
+      {
+        "name": "Create Task",
+        "request": {
+          "method": "POST",
+          "header": [
+            { "key": "Authorization", "value": "Bearer {{token}}" },
+            { "key": "Content-Type", "value": "application/json" }
+          ],
+          "url": "{{base_url}}/tasks",
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"title\": \"Install drip irrigation\",\n  \"description\": \"Install drip irrigation lines in section A\",\n  \"land\": \"<landId>\",\n  \"assignedTo\": \"<userId-assignee>\",\n  \"category\": \"maintenance\",\n  \"priority\": \"high\",\n  \"dueDate\": \"2025-12-20T12:00:00.000Z\"\n}"
+          }
+        }
+      },
+      {
+        "name": "Get All Tasks",
+        "request": {
+          "method": "GET",
+          "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+          "url": "{{base_url}}/tasks"
+        }
+      },
+      {
+        "name": "Get Overdue Tasks",
+        "request": {
+          "method": "GET",
+          "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+          "url": "{{base_url}}/tasks/overdue"
+        }
+      },
+      {
+        "name": "Get Task by ID",
+        "request": {
+          "method": "GET",
+          "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+          "url": "{{base_url}}/tasks/<taskId>"
+        }
+      },
+      {
+        "name": "Get Tasks by User",
+        "request": {
+          "method": "GET",
+          "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+          "url": "{{base_url}}/tasks/user/<userId>"
+        }
+      },
+      {
+        "name": "Update Task",
+        "request": {
+          "method": "PUT",
+          "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ],
+          "url": "{{base_url}}/tasks/<taskId>",
+          "body": { "mode": "raw", "raw": "{\n  \"title\": \"Updated task title\"\n}" }
+        }
+      },
+      {
+        "name": "Update Task Status",
+        "request": {
+          "method": "PUT",
+          "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ],
+          "url": "{{base_url}}/tasks/<taskId>/status",
+          "body": { "mode": "raw", "raw": "{\n  \"status\": \"in_progress\",\n  \"notes\": \"Starting the work\"\n}" }
+        }
+      },
+      {
+        "name": "Update Task Progress",
+        "request": {
+          "method": "PUT",
+          "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ],
+          "url": "{{base_url}}/tasks/<taskId>/progress",
+          "body": { "mode": "raw", "raw": "{\n  \"percentage\": 50,\n  \"notes\": \"Halfway done\"\n}" }
+        }
+      },
+      {
+        "name": "Delete Task",
+        "request": {
+          "method": "DELETE",
+          "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+          "url": "{{base_url}}/tasks/<taskId>"
+        }
+      },
+      {
+        "name": "Add Volunteer",
+        "request": {
+          "method": "POST",
+          "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ],
+          "url": "{{base_url}}/tasks/<taskId>/volunteer",
+          "body": { "mode": "raw", "raw": "{\n  \"userId\": \"<volunteerUserId>\",\n  \"hours\": 3\n}" }
+        }
+      },
+      {
+        "name": "Add Feedback",
+        "request": {
+          "method": "POST",
+          "header": [ { "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" } ],
+          "url": "{{base_url}}/tasks/<taskId>/feedback",
+          "body": { "mode": "raw", "raw": "{\n  \"rating\": 5,\n  \"comment\": \"Great work!\"\n}" }
+        }
+      }
+    ]
+  }
+}

@@ -4,9 +4,12 @@ import {
   Loader2,
   Search,
   Trash2,
-  X
+  X,
+  Users,
+  UserCheck
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import AllocateResources from "../components/AllocateResources";
 
 export default function LandManagement() {
   const [lands, setLands] = useState([]);
@@ -25,6 +28,8 @@ export default function LandManagement() {
   });
   const [showRequests, setShowRequests] = useState(false);
 const [requests, setRequests] = useState([]);
+const [showAllocateModal, setShowAllocateModal] = useState(false);
+const [selectedLandForAllocation, setSelectedLandForAllocation] = useState(null);
 
 
   const BASE_URL = "http://localhost:5000/api/lands"; // update as needed
@@ -253,7 +258,40 @@ const rejectRequest = async (id) => {
               <p className="text-xs text-gray-500">
                 🌱 {land.soilType} | {land.area.total} {land.area.unit}
               </p>
+              
+              {/* Allocated Resources Display */}
+              {land.status === "allocated" && land.allocatedTo && (
+                <div className="mt-3 p-2 bg-blue-50 rounded border border-blue-200">
+                  <p className="text-xs font-semibold text-blue-900 mb-1">📍 Allocated To:</p>
+                  {land.allocatedTo.gardeners?.length > 0 && (
+                    <p className="text-xs text-blue-800">
+                      👨‍🌾 Gardeners: {land.allocatedTo.gardeners.map(g => g.user?.name || 'Unknown').join(', ')}
+                    </p>
+                  )}
+                  {land.allocatedTo.volunteer?.user && (
+                    <p className="text-xs text-blue-800">
+                      🙋 Volunteer: {land.allocatedTo.volunteer.user?.name || 'Unknown'}
+                    </p>
+                  )}
+                  {land.allocatedTo.expert?.user && (
+                    <p className="text-xs text-blue-800">
+                      🎓 Expert: {land.allocatedTo.expert.user?.name || 'Unknown'}
+                    </p>
+                  )}
+                </div>
+              )}
+
               <div className="flex justify-end gap-3 mt-3">
+                <button
+                  onClick={() => {
+                    setSelectedLandForAllocation(land);
+                    setShowAllocateModal(true);
+                  }}
+                  className="text-green-600 hover:text-green-800 flex items-center gap-1"
+                  title="Allocate resources"
+                >
+                  <Users className="w-4 h-4" />
+                </button>
                 <button
                   onClick={() => openForm(land)}
                   className="text-blue-600 hover:text-blue-800"
@@ -353,22 +391,9 @@ const rejectRequest = async (id) => {
         </div>
       )}
 
-      {showRequests && (
+{showRequests && (
   <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
     <div className="bg-white w-full max-w-3xl p-6 rounded-xl relative">
-      <button
-        onClick={() => setShowRequests(false)}
-        className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
-      >
-        <X className="w-5 h-5" />
-      </button>
-
-      <h2 className="text-xl font-bold mb-4 text-blue-700">Cultivation Requests</h2>
-
-    {showRequests && (
-  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-    <div className="bg-white w-full max-w-3xl p-6 rounded-xl relative">
-      
       <button
         onClick={() => setShowRequests(false)}
         className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
@@ -433,10 +458,20 @@ const rejectRequest = async (id) => {
   </div>
 )}
 
-    </div>
-  </div>
-)}
 
+      {/* Allocate Resources Modal */}
+      {showAllocateModal && selectedLandForAllocation && (
+        <AllocateResources
+          landId={selectedLandForAllocation._id}
+          onClose={() => {
+            setShowAllocateModal(false);
+            setSelectedLandForAllocation(null);
+          }}
+          onSuccess={() => {
+            fetchLands();
+          }}
+        />
+      )}
     </div>
   );
 }

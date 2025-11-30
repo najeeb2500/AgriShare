@@ -98,46 +98,54 @@ export const getLandsByLandowner = async (req, res) => {
   }
 };
 
-// Allocate land to gardener (Admin only)
-export const allocateLand = async (req, res) => {
+///////
+export const allocateGardenerAndVolunteers = async (req, res) => {
   try {
     const { landId } = req.params;
-    const { gardenerId, adminId } = req.body;
+    const { gardenerId, volunteerIds, adminId } = req.body;
 
-    // Check if land exists and is available
     const land = await Land.findById(landId);
-    if (!land) {
-      return res.status(404).json({ message: "Land not found" });
+    if (!land) return res.status(404).json({ message: "Land not found" });
+
+    // Must be available
+    if (land.status !== "available") {
+      return res.status(400).json({ message: "Land already allocated" });
     }
 
-    if (land.status !== 'available') {
-      return res.status(400).json({ message: "Land is not available for allocation" });
-    }
-
-    // Check if gardener exists and is approved
+    // Validate gardener
     const gardener = await User.findById(gardenerId);
-    if (!gardener || gardener.role !== 'gardener' || !gardener.isApproved) {
+    if (!gardener || gardener.role !== "gardener") {
       return res.status(400).json({ message: "Invalid gardener" });
     }
 
-    // Update land allocation
-    land.status = 'allocated';
+    // Validate volunteers
+    const volunteers = await User.find({ _id: { $in: volunteerIds } });
+    const invalidVolunteers = volunteers.filter(v => v.role !== "volunteer");
+    if (invalidVolunteers.length > 0) {
+      return res.status(400).json({ message: "One or more invalid volunteers" });
+    }
+
+    // Update land
+    land.status = "allocated";
     land.allocatedTo = {
       gardener: gardenerId,
+      volunteers: volunteerIds,
       allocatedAt: new Date(),
       allocatedBy: adminId
     };
 
-    const updatedLand = await land.save();
+    await land.save();
 
-    res.status(200).json({
-      message: "Land allocated successfully",
-      land: updatedLand
+    res.json({
+      message: "Land allocated to gardener + volunteers successfully",
+      land
     });
+
   } catch (error) {
     res.status(500).json({ message: "Error allocating land", error: error.message });
   }
 };
+//////
 
 // Update land status
 export const updateLandStatus = async (req, res) => {

@@ -88,15 +88,12 @@ export const approveRequest = async (req, res) => {
         .json({ message: "Request already processed earlier" });
     }
 
-    // Update land status
     await Land.findByIdAndUpdate(request.landId, {
       status: "allocated",
-      allocatedTo: {
-        user: request.userId,
-        gardener: null,
-        allocatedBy: adminId,
-        allocatedAt: new Date(),
-      },
+      allocatedTo: request.userId,
+      gardener: null,
+      allocatedBy: adminId,
+      allocatedAt: new Date(),
     });
 
     request.status = "approved";
@@ -109,9 +106,11 @@ export const approveRequest = async (req, res) => {
       request,
     });
   } catch (error) {
+    console.log("APPROVE ERROR:", error);
     res.status(500).json({ message: error.message });
   }
 };
+
 
 
 // -----------------------------

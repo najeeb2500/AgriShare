@@ -1,4 +1,5 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import TaskManagement from './components/TaskManagement';
 import Community from './pages/Community';
 import Dashboard from './pages/Dashboard';
 import Landing from './pages/Landing';
@@ -20,7 +21,8 @@ function App() {
         <Route path="/marketplace" element={<Marketplace />} />
         <Route path="/marketplace/:id" element={<ListingDetail />} />
         <Route path="/community" element={<Community />} />
-       <Route path="/lands" element={<LandManagement />} />
+        <Route path="/lands" element={<LandManagement />} />
+        <Route path="/tasks" element={<TaskManagement />} />
         {/* <Route path="*" element={<NotFound />} /> */}
       </Routes>
     </BrowserRouter>

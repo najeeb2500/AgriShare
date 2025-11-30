@@ -63,12 +63,16 @@ const landSchema = new mongoose.Schema(
       enum: ["available", "allocated", "cultivated", "maintenance", "cancelled"],
       default: "available",
     },
+    
     allocatedTo: {
-      gardener: String, // changed to String
-      user: String,
-      allocatedAt: Date,
-      allocatedBy: String, // changed to String
-    },
+  gardener: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  volunteers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  expert: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  allocatedAt: Date,
+  allocatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" }
+},
+
+   
     images: [String],
     documents: [String],
     terms: {

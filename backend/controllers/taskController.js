@@ -1,12 +1,12 @@
 import Task from "../models/Task.js";
-import Land from "../models/Land.js";
-import User from "../models/User.js";
 
 // Create a new task
 export const createTask = async (req, res) => {
   try {
     const taskData = req.body;
-    taskData.assignedBy = req.user.userId; // Assuming middleware sets req.user
+    console.log('Creating task with data:', taskData);
+    console.log('User ID from query:', req.query.userId);
+    taskData.assignedBy = req.query.userId; 
 
     const task = new Task(taskData);
     const savedTask = await task.save();
@@ -124,22 +124,25 @@ export const getTasksByUser = async (req, res) => {
 export const updateTaskStatus = async (req, res) => {
   try {
     const { taskId } = req.params;
+
     const { status, notes, images } = req.body;
-    const userId = req.user.userId;
 
     const updateData = { status };
-    
-    if (status === 'in_progress' && !req.body.startDate) {
+
+    if (status === 'in_progress') {
       updateData.startDate = new Date();
     }
-    
+
     if (status === 'completed') {
       updateData.completedDate = new Date();
     }
 
-    if (notes || images) {
+    if (notes) {
       updateData['progress.notes'] = notes;
-      if (images) updateData['progress.images'] = images;
+    }
+
+    if (images && Array.isArray(images)) {
+      updateData['progress.images'] = images;
     }
 
     const task = await Task.findByIdAndUpdate(
@@ -156,10 +159,16 @@ export const updateTaskStatus = async (req, res) => {
       message: "Task status updated successfully",
       task
     });
+
   } catch (error) {
-    res.status(500).json({ message: "Error updating task status", error: error.message });
+    console.error(error);
+    res.status(500).json({ 
+      message: "Error updating task status", 
+      error: error.message 
+    });
   }
 };
+
 
 // Update task progress
 export const updateTaskProgress = async (req, res) => {

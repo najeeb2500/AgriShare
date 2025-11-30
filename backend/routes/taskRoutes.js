@@ -1,39 +1,39 @@
 import express from "express";
 import {
-  createTask,
-  getTasks,
-  getTaskById,
-  getTasksByUser,
-  updateTaskStatus,
-  updateTaskProgress,
-  addVolunteer,
   addTaskFeedback,
-  updateTask,
+  addVolunteer,
+  createTask,
   deleteTask,
-  getOverdueTasks
+  getOverdueTasks,
+  getTaskById,
+  getTasks,
+  getTasksByUser,
+  updateTask,
+  updateTaskProgress,
+  updateTaskStatus
 } from "../controllers/taskController.js";
-import { authenticateToken, requireApproval, requireAdmin, requireRole } from "../middleware/auth.js";
+import { authenticateToken } from "../middleware/auth.js";
 
 const router = express.Router();
 
 // All routes require authentication
-router.use(authenticateToken);
+// router.use(authenticateToken);
 
 // General task routes (require approval)
-router.get("/", requireApproval, getTasks);
-router.get("/overdue", requireApproval, getOverdueTasks);
-router.get("/:id", requireApproval, getTaskById);
-router.get("/user/:userId", requireApproval, getTasksByUser);
+router.get("/", getTasks);
+router.get("/overdue", getOverdueTasks);
+router.get("/:id", getTaskById);
+router.get("/user/:userId", getTasksByUser);
 
 // Task management routes (require approval)
-router.post("/", requireRole('admin', 'volunteer'), requireApproval, createTask);
-router.put("/:taskId", requireApproval, updateTask);
-router.put("/:taskId/status", requireApproval, updateTaskStatus);
-router.put("/:taskId/progress", requireApproval, updateTaskProgress);
-router.delete("/:taskId", requireApproval, deleteTask);
+router.post("/", createTask);
+router.put("/:taskId", updateTask);
+router.put("/:taskId/status", updateTaskStatus);
+router.put("/:taskId/progress", updateTaskProgress);
+router.delete("/:taskId", deleteTask);
 
 // Volunteer and feedback routes
-router.post("/:taskId/volunteer", requireRole('volunteer'), requireApproval, addVolunteer);
-router.post("/:taskId/feedback", requireApproval, addTaskFeedback);
+router.post("/:taskId/volunteer", addVolunteer);
+router.post("/:taskId/feedback", addTaskFeedback);
 
 export default router;

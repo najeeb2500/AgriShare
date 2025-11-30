@@ -34,7 +34,7 @@ router.put("/approve-user/:userId", requireAdmin, approveUser);
 router.delete("/reject-user/:userId", requireAdmin, rejectUser);
 
 // General user routes (require approval)
-router.get("/users", requireApproval, getUsers);
+router.get("/users",  getUsers);
 router.get("/users/:id", requireApproval, getUserById);
 router.put("/users/:id", requireApproval, updateUser);
 router.delete("/users/:id", requireAdmin, deleteUser);

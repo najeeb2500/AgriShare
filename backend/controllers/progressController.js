@@ -10,7 +10,7 @@ export const createProgress = async (req, res) => {
 
     const progress = new Progress(progressData);
     const savedProgress = await progress.save();
-
+    
     // Populate the saved progress with related data
     await savedProgress.populate([
       { path: 'land', select: 'title location area' },

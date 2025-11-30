@@ -1,6 +1,6 @@
 import express from "express";
 import {
-  allocateLand,
+  allocateGardenerAndVolunteers,
   createLand,
   deleteLand,
   getAvailableLands,
@@ -30,6 +30,9 @@ router.put("/:landId/status", updateLandStatus);
 router.delete("/:landId", deleteLand);
 
 // Admin only routes
-router.put("/:landId/allocate", requireAdmin, allocateLand);
+router.put("/:landId/allocate", requireAdmin, );
+
+//allocateGarVolunRout
+router.put("/allocate/all/:landId", allocateGardenerAndVolunteers);
 
 export default router;
