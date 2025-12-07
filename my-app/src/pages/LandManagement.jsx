@@ -4,9 +4,8 @@ import {
   Loader2,
   Search,
   Trash2,
-  X,
   Users,
-  UserCheck
+  X
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import AllocateResources from "../components/AllocateResources";
@@ -263,19 +262,19 @@ const rejectRequest = async (id) => {
               {land.status === "allocated" && land.allocatedTo && (
                 <div className="mt-3 p-2 bg-blue-50 rounded border border-blue-200">
                   <p className="text-xs font-semibold text-blue-900 mb-1">📍 Allocated To:</p>
-                  {land.allocatedTo.gardeners?.length > 0 && (
+                  {land.allocatedTo.gardener && (
                     <p className="text-xs text-blue-800">
-                      👨‍🌾 Gardeners: {land.allocatedTo.gardeners.map(g => g.user?.name || 'Unknown').join(', ')}
+                      👨‍🌾 Gardener: {land.allocatedTo.gardener?.name || 'Unknown'}
                     </p>
                   )}
-                  {land.allocatedTo.volunteer?.user && (
+                  {land.allocatedTo.volunteer && (
                     <p className="text-xs text-blue-800">
-                      🙋 Volunteer: {land.allocatedTo.volunteer.user?.name || 'Unknown'}
+                      🙋 Volunteer: {land.allocatedTo.volunteer?.name || 'Unknown'}
                     </p>
                   )}
-                  {land.allocatedTo.expert?.user && (
+                  {land.allocatedTo.expert && (
                     <p className="text-xs text-blue-800">
-                      🎓 Expert: {land.allocatedTo.expert.user?.name || 'Unknown'}
+                      🎓 Expert: {land.allocatedTo.expert?.name || 'Unknown'}
                     </p>
                   )}
                 </div>

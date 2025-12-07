@@ -1,5 +1,5 @@
-import LandRequest from "../models/LandRequest.js";
 import Land from "../models/Land.js";
+import LandRequest from "../models/LandRequest.js";
 
 
 // -----------------------------
@@ -58,9 +58,10 @@ export const createRequest = async (req, res) => {
 // -----------------------------
 export const getAllRequests = async (req, res) => {
   try {
-    const requests = await LandRequest.find({status:"pending"}).sort({ createdAt: -1 })
-      .populate("userId", "name email role")     // populate user details
-      .populate("landId", "title location");;
+    const requests = await LandRequest.find({ status: "pending" })
+      .sort({ createdAt: -1 })
+      .populate("userId", "name email role")
+      .populate("landId", "title location");
 
     res.status(200).json(requests);
   } catch (error) {

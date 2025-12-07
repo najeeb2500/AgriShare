@@ -1,6 +1,6 @@
+import nodemailer from "nodemailer";
 import Land from "../models/Land.js";
 import User from "../models/User.js";
-import nodemailer from "nodemailer";
 // Create a new land listing
 export const createLand = async (req, res) => {
   try {
@@ -49,6 +49,9 @@ export const getAvailableLands = async (req, res) => {
     const lands = await Land.find(query)
       .populate('landowner', 'name email phone')
       .populate('allocatedTo.gardener', 'name email')
+      .populate('allocatedTo.volunteer', 'name email')
+      .populate('allocatedTo.volunteers', 'name email')
+      .populate('allocatedTo.expert', 'name email')
       .sort({ createdAt: -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit);
@@ -72,6 +75,9 @@ export const getLandById = async (req, res) => {
     const land = await Land.findById(req.params.id)
       .populate('landowner', 'name email phone address')
       .populate('allocatedTo.gardener', 'name email phone')
+      .populate('allocatedTo.volunteer', 'name email phone')
+      .populate('allocatedTo.volunteers', 'name email phone')
+      .populate('allocatedTo.expert', 'name email phone')
       .populate('allocatedTo.allocatedBy', 'name email');
 
     if (!land) {
@@ -90,6 +96,9 @@ export const getLandsByLandowner = async (req, res) => {
     const { landownerId } = req.params;
     const lands = await Land.find({ isActive:true })
       .populate('allocatedTo.gardener', 'name email phone')
+      .populate('allocatedTo.volunteer', 'name email phone')
+      .populate('allocatedTo.volunteers', 'name email phone')
+      .populate('allocatedTo.expert', 'name email phone')
       .sort({ createdAt: -1 });
 
     res.status(200).json(lands);
@@ -102,43 +111,104 @@ export const getLandsByLandowner = async (req, res) => {
 export const allocateGardenerAndVolunteers = async (req, res) => {
   try {
     const { landId } = req.params;
-    const { gardenerId, volunteerIds, adminId } = req.body;
+    const { gardenerIds = [], volunteerId, expertId, adminId } = req.body;
+
+    console.log('=== ALLOCATION REQUEST ===');
+    console.log('landId:', landId);
+    console.log('gardenerIds:', gardenerIds);
+    console.log('volunteerId:', volunteerId);
+    console.log('expertId:', expertId);
+    console.log('adminId:', adminId);
 
     const land = await Land.findById(landId);
     if (!land) return res.status(404).json({ message: "Land not found" });
 
-    // Must be available
-    if (land.status !== "available") {
-      return res.status(400).json({ message: "Land already allocated" });
+    // Validate gardeners
+    if (gardenerIds.length === 0) {
+      return res.status(400).json({ message: "At least one gardener must be selected" });
     }
 
-    // Validate gardener
-    const gardener = await User.findById(gardenerId);
-    if (!gardener || gardener.role !== "gardener") {
-      return res.status(400).json({ message: "Invalid gardener" });
+    const gardeners = await User.find({ _id: { $in: gardenerIds } });
+    const invalidGardeners = gardeners.filter(g => g.role !== "gardener");
+    if (invalidGardeners.length > 0) {
+      return res.status(400).json({ message: "One or more invalid gardeners" });
     }
 
-    // Validate volunteers
-    const volunteers = await User.find({ _id: { $in: volunteerIds } });
-    const invalidVolunteers = volunteers.filter(v => v.role !== "volunteer");
-    if (invalidVolunteers.length > 0) {
-      return res.status(400).json({ message: "One or more invalid volunteers" });
+    // Check if any gardener is already allocated to another land
+    const allocatedLands = await Land.find({
+      'allocatedTo.gardener': { $in: gardenerIds }
+    });
+    if (allocatedLands.length > 0) {
+      return res.status(400).json({ message: "One or more gardeners are already allocated to another land" });
+    }
+
+    // Validate volunteer if provided
+    if (volunteerId && volunteerId.trim()) {
+      console.log('Validating volunteer:', volunteerId);
+      const volunteer = await User.findById(volunteerId);
+      if (!volunteer || volunteer.role !== "volunteer") {
+        console.log('Invalid volunteer - not found or wrong role');
+        return res.status(400).json({ message: "Invalid volunteer" });
+      }
+
+      // Check if volunteer is already allocated
+      const volunteerAllocated = await Land.findOne({
+        'allocatedTo.volunteer': volunteerId
+      });
+      if (volunteerAllocated) {
+        console.log('Volunteer already allocated to another land');
+        return res.status(400).json({ message: "This volunteer is already allocated to another land" });
+      }
+    }
+
+    // Validate expert if provided
+    if (expertId && expertId.trim()) {
+      console.log('Validating expert:', expertId);
+      const expert = await User.findById(expertId);
+      if (!expert || expert.role !== "expert") {
+        console.log('Invalid expert - not found or wrong role');
+        return res.status(400).json({ message: "Invalid expert" });
+      }
+
+      // Check if expert is already allocated
+      const expertAllocated = await Land.findOne({
+        'allocatedTo.expert': expertId
+      });
+      if (expertAllocated) {
+        console.log('Expert already allocated to another land');
+        return res.status(400).json({ message: "This expert is already allocated to another land" });
+      }
     }
 
     // Update land
     land.status = "allocated";
     land.allocatedTo = {
-      gardener: gardenerId,
-      volunteers: volunteerIds,
+      gardener: gardenerIds[0], // Keep first gardener as primary
+      volunteer: (volunteerId && volunteerId.trim()) ? volunteerId : null,
+      volunteers: gardenerIds.slice(1), // Other gardeners as volunteers
+      expert: (expertId && expertId.trim()) ? expertId : null,
       allocatedAt: new Date(),
       allocatedBy: adminId
     };
 
+    console.log('Before save, allocatedTo:', land.allocatedTo);
     await land.save();
+    console.log('After save, allocatedTo:', land.allocatedTo);
+
+    // Fetch the updated land with populated fields
+    const updatedLand = await Land.findById(landId)
+      .populate('allocatedTo.gardener', 'name email phone')
+      .populate('allocatedTo.volunteer', 'name email phone')
+      .populate('allocatedTo.volunteers', 'name email phone')
+      .populate('allocatedTo.expert', 'name email phone')
+      .populate('allocatedTo.allocatedBy', 'name email');
+
+    console.log('Updated land after populate:', updatedLand);
+    console.log('Updated land allocatedTo:', updatedLand.allocatedTo);
 
     res.json({
-      message: "Land allocated to gardener + volunteers successfully",
-      land
+      message: "Land allocated successfully",
+      land: updatedLand
     });
 
   } catch (error) {

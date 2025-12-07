@@ -10,6 +10,7 @@ import progressRoutes from "./routes/progressRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import landRequestRoutes from './routes/landRequestRoutes.js';
+import volunteerRequestRoutes from "./routes/volunteerRequestRoutes.js";
 // import expertAdviceRoutes from "./routes/expertAdviceRoutes.js";
 
 dotenv.config();
@@ -35,6 +36,7 @@ app.use("/api/progress", progressRoutes);
 app.use("/api/community", communityRoutes);
 app.use("/api/marketplace", marketplaceRoutes);
 app.use("/api/land-requests", landRequestRoutes);
+app.use("/api/volunteer-requests", volunteerRequestRoutes);
 // app.use("/api/expert-advice", expertAdviceRoutes);
 
 // Basic route

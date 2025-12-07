@@ -13,8 +13,8 @@ export default function Navigation({ user, onLogout }) {
 
     const baseItems = [
       { name: 'Dashboard', path: `/dashboard/${user.role}`, icon: '🏠' },
-      { name: 'Community', path: '/community', icon: '👥' },
-      { name: 'Marketplace', path: '/marketplace', icon: '🛒' }
+      // { name: 'Community', path: '/community', icon: '👥' },
+      // { name: 'Marketplace', path: '/marketplace', icon: '🛒' }
     ];
 
     // Role-specific navigation items
@@ -36,19 +36,19 @@ export default function Navigation({ user, onLogout }) {
           ...baseItems,
           { name: 'Available Lands', path: `/dashboard/${user.role}`, icon: '🌱' },
           { name: 'My Tasks', path: `/dashboard/${user.role}`, icon: '📋' },
-          { name: 'Progress', path: `/dashboard/${user.role}`, icon: '📊' }
+          // { name: 'Progress', path: `/dashboard/${user.role}`, icon: '📊' }
         ];
       case 'volunteer':
         return [
           ...baseItems,
           { name: 'Volunteer Tasks', path: `/dashboard/${user.role}`, icon: '🤝' },
-          { name: 'Community Events', path: `/dashboard/${user.role}`, icon: '📅' }
+          // { name: 'Community Events', path: `/dashboard/${user.role}`, icon: '📅' }
         ];
       case 'expert':
         return [
           ...baseItems,
           { name: 'Advice Requests', path: `/dashboard/${user.role}`, icon: '🎓' },
-          { name: 'Knowledge Base', path: `/dashboard/${user.role}`, icon: '📚' }
+          // { name: 'Knowledge Base', path: `/dashboard/${user.role}`, icon: '📚' }
         ];
       default:
         return baseItems;

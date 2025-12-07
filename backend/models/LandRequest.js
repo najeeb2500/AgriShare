@@ -3,13 +3,13 @@ import mongoose from "mongoose";
 const landRequestSchema = new mongoose.Schema(
   {
     landId: {
-      type: String, // land id as string
-      ref:"User",
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Land",
       required: true,
     },
     userId: {
-      type: String, // who requested
-      ref:"Land",
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
     crop: {

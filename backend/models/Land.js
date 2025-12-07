@@ -66,6 +66,7 @@ const landSchema = new mongoose.Schema(
     
     allocatedTo: {
   gardener: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  volunteer: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   volunteers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   expert: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
   allocatedAt: Date,

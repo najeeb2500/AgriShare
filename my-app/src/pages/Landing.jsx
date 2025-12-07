@@ -10,21 +10,21 @@ export default function Landing() {
       title: 'Land Sharing',
       description: 'Connect landowners with gardeners for community farming'
     },
-    {
-      icon: '👥',
-      title: 'Community Building',
-      description: 'Foster knowledge sharing and collaboration among farmers'
-    },
+    // {
+    //   icon: '👥',
+    //   title: 'Community Building',
+    //   description: 'Foster knowledge sharing and collaboration among farmers'
+    // },
     {
       icon: '📊',
       title: 'Progress Tracking',
       description: 'Monitor farming activities and track yield progress'
     },
-    {
-      icon: '🛒',
-      title: 'Marketplace',
-      description: 'Direct produce sales between farmers and consumers'
-    },
+    // {
+    //   icon: '🛒',
+    //   title: 'Marketplace',
+    //   description: 'Direct produce sales between farmers and consumers'
+    // },
     {
       icon: '🎯',
       title: 'Task Management',
@@ -58,37 +58,41 @@ export default function Landing() {
       description: 'Provide agricultural guidance and advice',
       features: ['Share knowledge', 'Give advice', 'Monitor progress']
     },
-    {
-      role: 'Admin',
-      description: 'Manage the platform and ensure smooth operation',
-      features: ['Approve users', 'Allocate lands', 'Oversee activities']
-    }
+    // {
+    //   role: 'Admin',
+    //   description: 'Manage the platform and ensure smooth operation',
+    //   features: ['Approve users', 'Allocate lands', 'Oversee activities']
+    // }
   ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100">
       {/* Hero Section */}
-      <div className="relative overflow-hidden">
+      {/* Hero Section */}
+      <div className="relative overflow-hidden bg-cover bg-center bg-no-repeat" style={{
+        backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2000)',
+        minHeight: '600px'
+      }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           <div className="text-center">
-            <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 drop-shadow-lg">
               Welcome to{' '}
-              <span className="text-green-600">AgriShare</span>
+              <span className="text-green-400">AgriShare</span>
             </h1>
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+            <p className="text-xl text-white mb-8 max-w-3xl mx-auto drop-shadow-md">
               A community-driven platform that connects landowners, gardeners, volunteers, 
               and agriculture experts to promote sustainable agriculture and local food production.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={() => navigate('/signup')}
-                className="px-8 py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium text-lg transition-colors"
+                className="px-8 py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium text-lg transition-colors shadow-lg"
               >
                 Join the Community
               </button>
               <button
                 onClick={() => navigate('/login')}
-                className="px-8 py-4 border-2 border-green-600 text-green-600 rounded-lg hover:bg-green-600 hover:text-white font-medium text-lg transition-colors"
+                className="px-8 py-4 border-2 border-white text-white rounded-lg hover:bg-white hover:text-green-600 font-medium text-lg transition-colors shadow-lg"
               >
                 Sign In
               </button>
@@ -160,34 +164,6 @@ export default function Landing() {
         </div>
       </div>
 
-      {/* Stats Section */}
-      <div className="py-20 bg-green-600">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-4xl font-bold text-white mb-8">
-              Growing Together
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-              <div className="text-center">
-                <div className="text-4xl font-bold text-white mb-2">100+</div>
-                <div className="text-green-100">Active Users</div>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-white mb-2">50+</div>
-                <div className="text-green-100">Shared Lands</div>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-white mb-2">200+</div>
-                <div className="text-green-100">Completed Tasks</div>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-white mb-2">500+</div>
-                <div className="text-green-100">Community Posts</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* CTA Section */}
       <div className="py-20 bg-white">
@@ -233,8 +209,8 @@ export default function Landing() {
               <h3 className="text-lg font-semibold mb-4">Platform</h3>
               <ul className="space-y-2 text-gray-400">
                 <li><a href="#" className="hover:text-white">Land Sharing</a></li>
-                <li><a href="#" className="hover:text-white">Community</a></li>
-                <li><a href="#" className="hover:text-white">Marketplace</a></li>
+                {/* <li><a href="#" className="hover:text-white">Community</a></li> */}
+                {/* <li><a href="#" className="hover:text-white">Marketplace</a></li> */}
                 <li><a href="#" className="hover:text-white">Progress Tracking</a></li>
               </ul>
             </div>
@@ -258,7 +234,7 @@ export default function Landing() {
             </div>
           </div>
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 AgriShare. All rights reserved.</p>
+            <p>&copy; 2025 AgriShare. All rights reserved.</p>
           </div>
         </div>
       </footer>

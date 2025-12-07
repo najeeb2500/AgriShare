@@ -90,19 +90,19 @@ export default function TaskManagement() {
 
   const fetchUsers = async () => {
     try {
-    
-      const res = await fetch('http://localhost:5000/api/users/users', {
+      const res = await fetch('http://localhost:5000/api/users/', {
         headers: {
         }
       });
       const data = await res.json();
-          
-    const filteredUsers = (data || []).filter(user =>
-      user.role == 'gardener' 
       
-    );
+      // Filter users with gardener role
+      const filteredUsers = (data || []).filter(user =>
+        user.role === 'gardener' 
+      );
 
       console.log('Users data:', data);
+      console.log('Filtered gardeners:', filteredUsers);
       setUsers(filteredUsers || []);
     } catch (err) {
       console.error('Failed to fetch users:', err);

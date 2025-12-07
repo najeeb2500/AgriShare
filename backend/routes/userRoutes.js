@@ -1,17 +1,17 @@
 import express from "express";
 import {
-  approveUser,
-  createUser,
-  deleteUser,
-  getPendingUsers,
-  getUserById,
-  getUserProfile,
-  getUsers,
-  getUsersByRole,
-  loginUser,
-  rejectUser,
-  updateUser,
-  updateUserProfile
+    approveUser,
+    createUser,
+    deleteUser,
+    getPendingUsers,
+    getUserById,
+    getUserProfile,
+    getUsers,
+    getUsersByRole,
+    loginUser,
+    rejectUser,
+    updateUser,
+    updateUserProfile
 } from "../controllers/userController.js";
 import { requireAdmin, requireApproval } from "../middleware/auth.js";
 
@@ -34,10 +34,10 @@ router.put("/approve-user/:userId", requireAdmin, approveUser);
 router.delete("/reject-user/:userId", requireAdmin, rejectUser);
 
 // General user routes (require approval)
-router.get("/users",  getUsers);
-router.get("/users/:id", requireApproval, getUserById);
-router.put("/users/:id", requireApproval, updateUser);
-router.delete("/users/:id", requireAdmin, deleteUser);
-router.get("/users/role/:role", requireApproval, getUsersByRole);
+router.get("/",  getUsers);
+router.get("/:id", requireApproval, getUserById);
+router.put("/:id", requireApproval, updateUser);
+router.delete("/:id", requireAdmin, deleteUser);
+router.get("/role/:role", requireApproval, getUsersByRole);
 
 export default router;

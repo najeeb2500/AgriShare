@@ -12,10 +12,60 @@ export default function AllocateResources({ landId, onClose, onSuccess }) {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [usersLoading, setUsersLoading] = useState(true);
+  const [allocatedUserIds, setAllocatedUserIds] = useState(new Set());
 
   useEffect(() => {
     fetchUsers();
+    fetchAllocatedUsers();
   }, []);
+
+  const fetchAllocatedUsers = async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/lands/available');
+      const data = await res.json();
+      const lands = data.lands || [];
+      
+      const allocated = new Set();
+      lands.forEach(land => {
+        if (land.allocatedTo) {
+          // Add gardener
+          if (land.allocatedTo.gardener) {
+            const gardenerId = typeof land.allocatedTo.gardener === 'object' 
+              ? land.allocatedTo.gardener._id 
+              : land.allocatedTo.gardener;
+            if (gardenerId) allocated.add(gardenerId);
+          }
+          
+          // Add volunteer
+          if (land.allocatedTo.volunteer) {
+            const volunteerId = typeof land.allocatedTo.volunteer === 'object' 
+              ? land.allocatedTo.volunteer._id 
+              : land.allocatedTo.volunteer;
+            if (volunteerId) allocated.add(volunteerId);
+          }
+          
+          // Add expert
+          if (land.allocatedTo.expert) {
+            const expertId = typeof land.allocatedTo.expert === 'object' 
+              ? land.allocatedTo.expert._id 
+              : land.allocatedTo.expert;
+            if (expertId) allocated.add(expertId);
+          }
+          
+          // Add other volunteers
+          if (land.allocatedTo.volunteers && Array.isArray(land.allocatedTo.volunteers)) {
+            land.allocatedTo.volunteers.forEach(v => {
+              const vId = typeof v === 'object' ? v._id : v;
+              if (vId) allocated.add(vId);
+            });
+          }
+        }
+      });
+      setAllocatedUserIds(allocated);
+    } catch (err) {
+      console.error('Failed to fetch allocated users:', err);
+    }
+  };
 
   const fetchUsers = async () => {
     try {
@@ -31,7 +81,7 @@ export default function AllocateResources({ landId, onClose, onSuccess }) {
       if (!res.ok) throw new Error('Failed to fetch users');
       const data = await res.json();
       
-      const users = data.users || data || [];
+      const users = Array.isArray(data) ? data : (data.users || []);
       
       setGardeners(users.filter(u => u.role === 'gardener'));
       setVolunteers(users.filter(u => u.role === 'volunteer'));
@@ -61,10 +111,24 @@ export default function AllocateResources({ landId, onClose, onSuccess }) {
         return;
       }
 
+      if (!selectedVolunteer) {
+        setError('Please select a volunteer');
+        return;
+      }
+
       setLoading(true);
       setError('');
       const token = localStorage.getItem('token');
       const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+      const payload = {
+        gardenerIds: selectedGardeners,
+        volunteerId: selectedVolunteer ? selectedVolunteer : null,
+        expertId: selectedExpert ? selectedExpert : null,
+        adminId: user._id
+      };
+      
+      console.log('Allocation payload:', payload);
 
       const res = await fetch(`http://localhost:5000/api/lands/allocate/all/${landId}`, {
         method: 'PUT',
@@ -72,18 +136,16 @@ export default function AllocateResources({ landId, onClose, onSuccess }) {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-          gardenerIds: selectedGardeners,
-          volunteerId: selectedVolunteer || null,
-          expertId: selectedExpert || null,
-          adminId: user._id
-        })
+        body: JSON.stringify(payload)
       });
 
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.message || 'Failed to allocate resources');
       }
+
+      const result = await res.json();
+      console.log('Allocation result:', result);
 
       setSuccess('Resources allocated successfully!');
       setTimeout(() => {
@@ -92,6 +154,7 @@ export default function AllocateResources({ landId, onClose, onSuccess }) {
       }, 1500);
     } catch (err) {
       setError(err.message || 'Failed to allocate resources');
+      console.error('Allocation error:', err);
     } finally {
       setLoading(false);
     }
@@ -150,30 +213,32 @@ export default function AllocateResources({ landId, onClose, onSuccess }) {
                   {gardeners.length === 0 ? (
                     <p className="text-gray-500 text-sm">No gardeners available</p>
                   ) : (
-                    gardeners.map(gardener => (
-                      <label key={gardener._id} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={selectedGardeners.includes(gardener._id)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              handleAddGardener(gardener._id);
-                            } else {
-                              handleRemoveGardener(gardener._id);
-                            }
-                          }}
-                          className="w-4 h-4 text-green-600 rounded"
-                        />
-                        <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-900">{gardener.name}</p>
-                          <p className="text-xs text-gray-500">{gardener.email}</p>
-                        </div>
-                      </label>
-                    ))
+                    gardeners
+                      .filter(gardener => !allocatedUserIds.has(gardener._id))
+                      .map(gardener => (
+                        <label key={gardener._id} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedGardeners.includes(gardener._id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                handleAddGardener(gardener._id);
+                              } else {
+                                handleRemoveGardener(gardener._id);
+                              }
+                            }}
+                            className="w-4 h-4 text-green-600 rounded"
+                          />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-gray-900">{gardener.name}</p>
+                            <p className="text-xs text-gray-500">{gardener.email}</p>
+                          </div>
+                        </label>
+                      ))
                   )}
                 </div>
-                {gardeners.length === 0 && (
-                  <p className="text-sm text-red-600 mt-2">No gardeners available in the system</p>
+                {gardeners.filter(g => !allocatedUserIds.has(g._id)).length === 0 && (
+                  <p className="text-sm text-red-600 mt-2">No available gardeners in the system</p>
                 )}
               </div>
 
@@ -205,22 +270,24 @@ export default function AllocateResources({ landId, onClose, onSuccess }) {
               {/* Volunteer Section */}
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-3">
-                  Select Volunteer (Optional)
+                  Select Volunteer *
                 </label>
                 <select
                   value={selectedVolunteer}
                   onChange={(e) => setSelectedVolunteer(e.target.value)}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                 >
-                  <option value="">-- No Volunteer --</option>
-                  {volunteers.map(volunteer => (
-                    <option key={volunteer._id} value={volunteer._id}>
-                      {volunteer.name} ({volunteer.email})
-                    </option>
-                  ))}
+                  <option value="">-- Select a Volunteer --</option>
+                  {volunteers
+                    .filter(volunteer => !allocatedUserIds.has(volunteer._id))
+                    .map(volunteer => (
+                      <option key={volunteer._id} value={volunteer._id}>
+                        {volunteer.name} ({volunteer.email})
+                      </option>
+                    ))}
                 </select>
-                {volunteers.length === 0 && (
-                  <p className="text-sm text-yellow-600 mt-2">No volunteers available in the system</p>
+                {volunteers.filter(v => !allocatedUserIds.has(v._id)).length === 0 && (
+                  <p className="text-sm text-yellow-600 mt-2">No available volunteers in the system</p>
                 )}
               </div>
 
@@ -235,14 +302,16 @@ export default function AllocateResources({ landId, onClose, onSuccess }) {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                 >
                   <option value="">-- No Expert --</option>
-                  {experts.map(expert => (
-                    <option key={expert._id} value={expert._id}>
-                      {expert.name} ({expert.email})
-                    </option>
-                  ))}
+                  {experts
+                    .filter(expert => !allocatedUserIds.has(expert._id))
+                    .map(expert => (
+                      <option key={expert._id} value={expert._id}>
+                        {expert.name} ({expert.email})
+                      </option>
+                    ))}
                 </select>
-                {experts.length === 0 && (
-                  <p className="text-sm text-yellow-600 mt-2">No experts available in the system</p>
+                {experts.filter(e => !allocatedUserIds.has(e._id)).length === 0 && (
+                  <p className="text-sm text-yellow-600 mt-2">No available experts in the system</p>
                 )}
               </div>
 
@@ -251,7 +320,7 @@ export default function AllocateResources({ landId, onClose, onSuccess }) {
                 <h3 className="font-semibold text-gray-900 mb-2">Allocation Summary</h3>
                 <ul className="text-sm text-gray-700 space-y-1">
                   <li>• <strong>Gardeners:</strong> {selectedGardeners.length} selected</li>
-                  <li>• <strong>Volunteer:</strong> {selectedVolunteer ? volunteers.find(v => v._id === selectedVolunteer)?.name : 'None'}</li>
+                  <li>• <strong>Volunteer:</strong> {selectedVolunteer ? volunteers.find(v => v._id === selectedVolunteer)?.name : 'Required'}</li>
                   <li>• <strong>Expert:</strong> {selectedExpert ? experts.find(e => e._id === selectedExpert)?.name : 'None'}</li>
                 </ul>
               </div>
@@ -270,7 +339,7 @@ export default function AllocateResources({ landId, onClose, onSuccess }) {
           </button>
           <button
             onClick={handleAllocate}
-            disabled={loading || selectedGardeners.length === 0 || usersLoading}
+            disabled={loading || selectedGardeners.length === 0 || !selectedVolunteer || usersLoading}
             className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition disabled:opacity-50 flex items-center gap-2"
           >
             {loading ? (

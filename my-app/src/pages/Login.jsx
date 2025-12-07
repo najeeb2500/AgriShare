@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 // LoginUser.jsx
-// React + Tailwind login page component
+// React + Tailwind login page component with background image
 export default function Login() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
@@ -53,10 +53,28 @@ export default function Login() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-green-50 to-green-100">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
+    <div className="relative flex items-center justify-center min-h-screen overflow-hidden">
+      {/* Background Image Layer */}
+      <div 
+        className="absolute inset-0 w-full h-full"
+        style={{
+          backgroundImage: 'url(https://images.unsplash.com/photo-1574943320219-553eb213f72d?q=80&w=2000&auto=format&fit=crop)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
+        }}
+      ></div>
+      
+      {/* Overlay for better readability */}
+      <div className="absolute inset-0 bg-gradient-to-br from-black/50 to-black/30"></div>
+      
+      {/* Login Form Card */}
+      <div className="relative z-10 w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 m-4">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-green-600 mb-2">AgriShare</h1>
+          <div className="flex items-center justify-center space-x-2 mb-2">
+            <span className="text-3xl">🌱</span>
+            <h1 className="text-3xl font-bold text-green-600">AgriShare</h1>
+          </div>
           <h2 className="text-2xl font-semibold text-gray-700">Welcome Back</h2>
           <p className="text-gray-500 mt-2">Sign in to your account</p>
         </div>
@@ -70,33 +88,33 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Email</label>
+            <label className="block text-sm font-medium mb-1 text-gray-700">Email</label>
             <input
               type="email"
               name="email"
               value={form.email}
               onChange={handleChange}
               placeholder="you@example.com"
-              className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-200"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Password</label>
+            <label className="block text-sm font-medium mb-1 text-gray-700">Password</label>
             <input
               type="password"
               name="password"
               value={form.password}
               onChange={handleChange}
               placeholder="••••••••"
-              className="w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-200"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
             />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex justify-center items-center gap-2 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-60 font-medium"
+            className="w-full flex justify-center items-center gap-2 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-60 font-medium transition-colors shadow-lg"
           >
             {loading ? (
               <svg
@@ -114,7 +132,7 @@ export default function Login() {
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-gray-500">
+        <p className="mt-6 text-center text-sm text-gray-600">
           Don't have an account? <a href="/signup" className="text-green-600 hover:underline font-medium">Register here</a>
         </p>
       </div>
