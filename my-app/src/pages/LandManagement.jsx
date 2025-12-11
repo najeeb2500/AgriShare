@@ -26,14 +26,12 @@ export default function LandManagement() {
     soilType: "unknown",
   });
   const [showRequests, setShowRequests] = useState(false);
-const [requests, setRequests] = useState([]);
-const [showAllocateModal, setShowAllocateModal] = useState(false);
-const [selectedLandForAllocation, setSelectedLandForAllocation] = useState(null);
+  const [requests, setRequests] = useState([]);
+  const [showAllocateModal, setShowAllocateModal] = useState(false);
+  const [selectedLandForAllocation, setSelectedLandForAllocation] = useState(null);
 
+  const BASE_URL = "http://localhost:5000/api/lands";
 
-  const BASE_URL = "http://localhost:5000/api/lands"; // update as needed
-
-  // 🔹 Fetch all available lands
   const fetchLands = async () => {
     setLoading(true);
     try {
@@ -47,24 +45,22 @@ const [selectedLandForAllocation, setSelectedLandForAllocation] = useState(null)
   };
 
   const fetchRequests = async () => {
-  try {
-    const res = await axios.get("http://localhost:5000/api/land-requests/all");
-    setRequests(res.data || []);
-    setShowRequests(true);
-      console.log("data",res.data)
-  } catch (err) {
-    console.error(err);
-    alert("Failed to load requests");
-  }
-};
-
+    try {
+      const res = await axios.get("http://localhost:5000/api/land-requests/all");
+      setRequests(res.data || []);
+      setShowRequests(true);
+      console.log("data", res.data);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to load requests");
+    }
+  };
 
   useEffect(() => {
     fetchLands();
-    fetchRequests()
+    fetchRequests();
   }, []);
 
-  // 🔹 Handle input
   const handleInputChange = (path, value) => {
     const parts = path.split(".");
     setFormData((prev) => {
@@ -78,7 +74,6 @@ const [selectedLandForAllocation, setSelectedLandForAllocation] = useState(null)
     });
   };
 
-  // 🔹 Open form (Add or Edit)
   const openForm = (land = null) => {
     if (land) {
       setEditingLand(land);
@@ -96,16 +91,13 @@ const [selectedLandForAllocation, setSelectedLandForAllocation] = useState(null)
     setShowForm(true);
   };
 
-  // 🔹 Create or Update Land
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       if (editingLand) {
-        // Update
         const res = await axios.put(`${BASE_URL}/${editingLand._id}`, formData);
         alert(res.data.message || "Land updated successfully");
       } else {
-        // Create
         const res = await axios.post(BASE_URL, {
           ...formData,
           createdBy: "landowner123",
@@ -120,7 +112,6 @@ const [selectedLandForAllocation, setSelectedLandForAllocation] = useState(null)
     }
   };
 
-  // 🔹 Delete land
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this land?")) return;
     try {
@@ -131,34 +122,31 @@ const [selectedLandForAllocation, setSelectedLandForAllocation] = useState(null)
     }
   };
 
-
   const approveRequest = async (id) => {
-  try {
-    await axios.put(`http://localhost:5000/api/land-requests/approve/${id}`, {
-      adminId: "admin123",
-    });
-    alert("Request approved");
-    fetchRequests();
-    fetchLands();
-  } catch (err) {
-    console.error(err);
-  }
-};
+    try {
+      await axios.put(`http://localhost:5000/api/land-requests/approve/${id}`, {
+        adminId: "admin123",
+      });
+      alert("Request approved");
+      fetchRequests();
+      fetchLands();
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-const rejectRequest = async (id) => {
-  try {
-    await axios.put(`http://localhost:5000/api/land-requests/reject/${id}`, {
-      adminId: "admin123",
-    });
-    alert("Request rejected");
-    fetchRequests();
-  } catch (err) {
-    console.error(err);
-  }
-};
+  const rejectRequest = async (id) => {
+    try {
+      await axios.put(`http://localhost:5000/api/land-requests/reject/${id}`, {
+        adminId: "admin123",
+      });
+      alert("Request rejected");
+      fetchRequests();
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-
-  // 🔹 Filter & Sort
   const filteredLands = lands
     .filter((l) => l.title.toLowerCase().includes(searchQuery.toLowerCase()))
     .filter((l) => (filterStatus ? l.status === filterStatus : true))
@@ -171,206 +159,237 @@ const rejectRequest = async (id) => {
     });
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-green-700">🌾 Land Management</h1>
-          <p className="text-gray-600 text-sm">Manage, edit, and allocate lands.</p>
-        </div>
-        {/* <button
-          onClick={() => openForm()}
-          className="mt-3 md:mt-0 flex items-center gap-2 px-5 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-        >
-          <Plus className="w-4 h-4" /> Add New Land
-        </button> */}
-      </div>
-
-      {/* Search + Filter */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-        <div className="flex gap-2 items-center flex-1">
-          <Search className="text-gray-500" />
-          <input
-            type="text"
-            placeholder="Search land..."
-            className="border px-3 py-2 rounded-lg flex-1"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <button
-  onClick={() => fetchRequests()}
-  className="mt-3 md:mt-0 flex items-center gap-2 px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
->
-  View Requests
-</button>
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            className="border px-3 py-2 rounded-lg"
-          >
-            <option value="">All Status</option>
-            <option value="available">Available</option>
-            <option value="allocated">Allocated</option>
-          </select>
-        </div>
-        <select
-          value={sortOption}
-          onChange={(e) => setSortOption(e.target.value)}
-          className="border px-3 py-2 rounded-lg"
-        >
-          <option value="">Sort By</option>
-          <option value="title-asc">Title A → Z</option>
-          <option value="title-desc">Title Z → A</option>
-          <option value="area-asc">Area ↑</option>
-          <option value="area-desc">Area ↓</option>
-        </select>
-      </div>
-
-      {/* Land Cards */}
-      {loading ? (
-        <div className="flex justify-center py-10">
-          <Loader2 className="animate-spin text-green-600 w-8 h-8" />
-        </div>
-      ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredLands.map((land) => (
-            <div
-              key={land._id}
-              className="bg-white border rounded-xl p-4 hover:shadow-md transition"
-            >
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="font-semibold text-gray-900">{land.title}</h3>
-                <span
-                  className={`px-2 py-1 text-xs rounded ${
-                    land.status === "available"
-                      ? "bg-green-100 text-green-800"
-                      : "bg-blue-100 text-blue-800"
-                  }`}
-                >
-                  {land.status}
-                </span>
-              </div>
-              <p className="text-sm text-gray-600 mb-3">{land.description}</p>
-              <p className="text-xs text-gray-500">
-                📍 {land.location?.address?.city}, {land.location?.address?.state}
-              </p>
-              <p className="text-xs text-gray-500">
-                🌱 {land.soilType} | {land.area.total} {land.area.unit}
-              </p>
-              
-              {/* Allocated Resources Display */}
-              {land.status === "allocated" && land.allocatedTo && (
-                <div className="mt-3 p-2 bg-blue-50 rounded border border-blue-200">
-                  <p className="text-xs font-semibold text-blue-900 mb-1">📍 Allocated To:</p>
-                  {land.allocatedTo.gardener && (
-                    <p className="text-xs text-blue-800">
-                      👨‍🌾 Gardener: {land.allocatedTo.gardener?.name || 'Unknown'}
-                    </p>
-                  )}
-                  {land.allocatedTo.volunteer && (
-                    <p className="text-xs text-blue-800">
-                      🙋 Volunteer: {land.allocatedTo.volunteer?.name || 'Unknown'}
-                    </p>
-                  )}
-                  {land.allocatedTo.expert && (
-                    <p className="text-xs text-blue-800">
-                      🎓 Expert: {land.allocatedTo.expert?.name || 'Unknown'}
-                    </p>
-                  )}
-                </div>
-              )}
-
-              <div className="flex justify-end gap-3 mt-3">
-                <button
-                  onClick={() => {
-                    setSelectedLandForAllocation(land);
-                    setShowAllocateModal(true);
-                  }}
-                  className="text-green-600 hover:text-green-800 flex items-center gap-1"
-                  title="Allocate resources"
-                >
-                  <Users className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => openForm(land)}
-                  className="text-blue-600 hover:text-blue-800"
-                >
-                  <Edit className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => handleDelete(land._id)}
-                  className="text-red-600 hover:text-red-800"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
+      {/* Hero Section with Background */}
+      <div className="relative bg-cover bg-center bg-no-repeat" style={{
+        backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=2000&auto=format&fit=crop)',
+        minHeight: '250px'
+      }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="text-center text-white">
+            <div className="flex items-center justify-center space-x-3 mb-3">
+              <span className="text-5xl">🌾</span>
+              <h1 className="text-4xl md:text-5xl font-bold drop-shadow-lg">Land Management</h1>
             </div>
-          ))}
+            <p className="text-lg drop-shadow-md opacity-90">Manage, edit, and allocate lands efficiently</p>
+          </div>
         </div>
-      )}
+        
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 120L60 105C120 90 240 60 360 45C480 30 600 30 720 37.5C840 45 960 60 1080 67.5C1200 75 1320 75 1380 75L1440 75V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="rgb(240 253 244)"/>
+          </svg>
+        </div>
+      </div>
 
-      {/* Popup Modal */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 -mt-8">
+        {/* Search + Filter Card */}
+        <div className="bg-white rounded-2xl shadow-xl p-6 mb-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex gap-3 items-center flex-1">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-3 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Search lands..."
+                  className="border border-gray-300 pl-10 pr-4 py-3 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-green-500"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <button
+                onClick={() => fetchRequests()}
+                className="flex items-center gap-2 px-5 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-medium shadow-lg transition transform hover:scale-105"
+              >
+                📋 View Requests
+              </button>
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="border border-gray-300 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
+              >
+                <option value="">All Status</option>
+                <option value="available">Available</option>
+                <option value="allocated">Allocated</option>
+              </select>
+            </div>
+            <select
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value)}
+              className="border border-gray-300 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
+            >
+              <option value="">Sort By</option>
+              <option value="title-asc">Title A → Z</option>
+              <option value="title-desc">Title Z → A</option>
+              <option value="area-asc">Area ↑</option>
+              <option value="area-desc">Area ↓</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Land Cards */}
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <Loader2 className="animate-spin text-green-600 w-16 h-16 mb-4" />
+            <p className="text-gray-600 font-medium">Loading lands...</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredLands.map((land) => (
+              <div
+                key={land._id}
+                className="group relative rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
+              >
+                {/* Card Background */}
+                <div 
+                  className="absolute inset-0 bg-cover bg-center"
+                  style={{
+                    backgroundImage: 'url(https://images.unsplash.com/photo-1625246333195-78d9c38ad449?q=80&w=800&auto=format&fit=crop)'
+                  }}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/70 to-transparent"></div>
+                </div>
+
+                {/* Card Content */}
+                <div className="relative p-6 min-h-[320px] flex flex-col justify-between">
+                  <div>
+                    <div className="flex justify-between items-start mb-3">
+                      <h3 className="font-bold text-xl text-white pr-2">{land.title}</h3>
+                      <span
+                        className={`px-3 py-1 text-xs rounded-full font-semibold shadow-lg ${
+                          land.status === "available"
+                            ? "bg-green-500 text-white"
+                            : "bg-blue-500 text-white"
+                        }`}
+                      >
+                        {land.status}
+                      </span>
+                    </div>
+                    <p className="text-gray-200 text-sm mb-4 line-clamp-2">{land.description}</p>
+                    
+                    <div className="space-y-2 bg-white/10 backdrop-blur-sm rounded-lg p-3 mb-3">
+                      <p className="text-sm text-gray-200 flex items-center">
+                        <span className="mr-2">📍</span>
+                        {land.location?.address?.city}, {land.location?.address?.state}
+                      </p>
+                      <p className="text-sm text-gray-200 flex items-center">
+                        <span className="mr-2">🌱</span>
+                        {land.soilType} | {land.area.total} {land.area.unit}
+                      </p>
+                    </div>
+                    
+                    {/* Allocated Resources */}
+                    {land.status === "allocated" && land.allocatedTo && (
+                      <div className="bg-blue-500/90 backdrop-blur-sm rounded-lg p-3 space-y-1">
+                        <p className="text-xs font-bold text-white mb-1">📍 Allocated To:</p>
+                        {land.allocatedTo.gardener && (
+                          <p className="text-xs text-white">👨‍🌾 Gardener: {land.allocatedTo.gardener?.name || 'Unknown'}</p>
+                        )}
+                        {land.allocatedTo.volunteer && (
+                          <p className="text-xs text-white">🙋 Volunteer: {land.allocatedTo.volunteer?.name || 'Unknown'}</p>
+                        )}
+                        {land.allocatedTo.expert && (
+                          <p className="text-xs text-white">🎓 Expert: {land.allocatedTo.expert?.name || 'Unknown'}</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex justify-end gap-3 mt-4">
+                    <button
+                      onClick={() => {
+                        setSelectedLandForAllocation(land);
+                        setShowAllocateModal(true);
+                      }}
+                      className="p-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition shadow-lg"
+                      title="Allocate resources"
+                    >
+                      <Users className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => openForm(land)}
+                      className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition shadow-lg"
+                      title="Edit"
+                    >
+                      <Edit className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(land._id)}
+                      className="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition shadow-lg"
+                      title="Delete"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Edit/Add Form Modal */}
       {showForm && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-lg w-full max-w-lg p-6 relative">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8 relative">
             <button
               onClick={() => setShowForm(false)}
-              className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition"
             >
-              <X className="w-5 h-5" />
+              <X className="w-6 h-6" />
             </button>
 
-            <h2 className="text-lg font-semibold mb-4 text-green-700">
-              {editingLand ? "Edit Land" : "Add New Land"}
+            <h2 className="text-2xl font-bold mb-6 text-green-700">
+              {editingLand ? "✏️ Edit Land" : "➕ Add New Land"}
             </h2>
 
-            <form onSubmit={handleSubmit} className="space-y-3">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <input
                 type="text"
                 placeholder="Title"
                 value={formData.title}
                 onChange={(e) => handleInputChange("title", e.target.value)}
-                className="border w-full px-3 py-2 rounded-lg"
+                className="border border-gray-300 w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
                 required
               />
               <textarea
                 placeholder="Description"
                 value={formData.description}
                 onChange={(e) => handleInputChange("description", e.target.value)}
-                className="border w-full px-3 py-2 rounded-lg"
+                className="border border-gray-300 w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
+                rows="3"
                 required
               />
-              <input
-                type="text"
-                placeholder="City"
-                value={formData.location.address.city}
-                onChange={(e) =>
-                  handleInputChange("location.address.city", e.target.value)
-                }
-                className="border w-full px-3 py-2 rounded-lg"
-              />
-              <input
-                type="text"
-                placeholder="State"
-                value={formData.location.address.state}
-                onChange={(e) =>
-                  handleInputChange("location.address.state", e.target.value)
-                }
-                className="border w-full px-3 py-2 rounded-lg"
-              />
+              <div className="grid grid-cols-2 gap-4">
+                <input
+                  type="text"
+                  placeholder="City"
+                  value={formData.location.address.city}
+                  onChange={(e) => handleInputChange("location.address.city", e.target.value)}
+                  className="border border-gray-300 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
+                />
+                <input
+                  type="text"
+                  placeholder="State"
+                  value={formData.location.address.state}
+                  onChange={(e) => handleInputChange("location.address.state", e.target.value)}
+                  className="border border-gray-300 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
+                />
+              </div>
               <input
                 type="number"
                 placeholder="Total Area"
                 value={formData.area.total}
                 onChange={(e) => handleInputChange("area.total", e.target.value)}
-                className="border w-full px-3 py-2 rounded-lg"
+                className="border border-gray-300 w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
               />
               <select
                 value={formData.soilType}
                 onChange={(e) => handleInputChange("soilType", e.target.value)}
-                className="border w-full px-3 py-2 rounded-lg"
+                className="border border-gray-300 w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
               >
-                <option value="unknown">Soil Type</option>
+                <option value="unknown">Select Soil Type</option>
                 <option value="clay">Clay</option>
                 <option value="sandy">Sandy</option>
                 <option value="loamy">Loamy</option>
@@ -381,7 +400,7 @@ const rejectRequest = async (id) => {
 
               <button
                 type="submit"
-                className="w-full py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                className="w-full py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 font-semibold shadow-lg transition"
               >
                 {editingLand ? "Update Land" : "Add Land"}
               </button>
@@ -390,73 +409,74 @@ const rejectRequest = async (id) => {
         </div>
       )}
 
-{showRequests && (
-  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-    <div className="bg-white w-full max-w-3xl p-6 rounded-xl relative">
-      <button
-        onClick={() => setShowRequests(false)}
-        className="absolute top-3 right-3 text-gray-500 hover:text-gray-800"
-      >
-        <X className="w-5 h-5" />
-      </button>
-
-      <h2 className="text-xl font-bold mb-4 text-blue-700">Cultivation Requests</h2>
-
-      {requests.length === 0 ? (
-        <p className="text-gray-600">No requests found.</p>
-      ) : (
-        <div className="space-y-4 max-h-[400px] overflow-y-auto">
-          {requests.map((req) => (
-            <div
-              key={req._id}
-              className="border p-4 rounded-lg shadow-sm bg-gray-50"
+      {/* Requests Modal */}
+      {showRequests && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white w-full max-w-4xl p-8 rounded-2xl shadow-2xl relative max-h-[80vh] overflow-hidden flex flex-col">
+            <button
+              onClick={() => setShowRequests(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition"
             >
-              <h3 className="font-semibold">🌱 {req.crop}</h3>
+              <X className="w-6 h-6" />
+            </button>
 
-              <p className="text-sm text-gray-700 mt-1">
-                <span className="font-medium">👤 User:</span>{" "}
-                {req?.userId?.name || "Unknown User"}
-              </p>
+            <h2 className="text-2xl font-bold mb-6 text-blue-700">📋 Cultivation Requests</h2>
 
-              <p className="text-sm text-gray-700">
-                <span className="font-medium">🌾 Land:</span>{" "}
-                {req?.landId?.title || "Unnamed Land"} (
-                {req?.landId?.location?.address?.city || "Unknown City"},
-                {req?.landId?.location?.address?.state || "Unknown State"})
-              </p>
+            <div className="overflow-y-auto flex-1">
+              {requests.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-gray-500 text-lg">No requests found.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {requests.map((req) => (
+                    <div
+                      key={req._id}
+                      className="border-l-4 border-blue-500 bg-gradient-to-r from-blue-50 to-white rounded-lg p-6 shadow-md hover:shadow-lg transition"
+                    >
+                      <h3 className="font-bold text-lg text-gray-900 mb-2">🌱 {req.crop}</h3>
 
-              <p className="text-sm text-gray-700">
-                <span className="font-medium">⏳ Duration:</span>{" "}
-                {req.cultivationDuration} months
-              </p>
+                      <div className="space-y-1 mb-3">
+                        <p className="text-sm text-gray-700">
+                          <span className="font-semibold">👤 User:</span> {req?.userId?.name || "Unknown User"}
+                        </p>
+                        <p className="text-sm text-gray-700">
+                          <span className="font-semibold">🌾 Land:</span> {req?.landId?.title || "Unnamed Land"} (
+                          {req?.landId?.location?.address?.city || "Unknown City"}, {req?.landId?.location?.address?.state || "Unknown State"})
+                        </p>
+                        <p className="text-sm text-gray-700">
+                          <span className="font-semibold">⏳ Duration:</span> {req.cultivationDuration} months
+                        </p>
+                      </div>
 
-              <p className="mt-2 text-xs text-gray-500 italic">
-                {req.message}
-              </p>
+                      {req.message && (
+                        <p className="text-sm text-gray-600 italic bg-gray-50 p-3 rounded-lg mb-4">
+                          "{req.message}"
+                        </p>
+                      )}
 
-              <div className="flex gap-3 mt-4 justify-end">
-                <button
-                  onClick={() => approveRequest(req._id)}
-                  className="px-4 py-1 rounded bg-green-600 text-white"
-                >
-                  Approve
-                </button>
-
-                <button
-                  onClick={() => rejectRequest(req._id)}
-                  className="px-4 py-1 rounded bg-red-600 text-white"
-                >
-                  Reject
-                </button>
-              </div>
+                      <div className="flex gap-3 justify-end">
+                        <button
+                          onClick={() => approveRequest(req._id)}
+                          className="px-5 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 font-semibold shadow-lg transition"
+                        >
+                          ✓ Approve
+                        </button>
+                        <button
+                          onClick={() => rejectRequest(req._id)}
+                          className="px-5 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 font-semibold shadow-lg transition"
+                        >
+                          ✗ Reject
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          ))}
+          </div>
         </div>
       )}
-    </div>
-  </div>
-)}
-
 
       {/* Allocate Resources Modal */}
       {showAllocateModal && selectedLandForAllocation && (
